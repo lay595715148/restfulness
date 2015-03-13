@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]><html class="no-js ie ie7 lte7 lte8 lte9" lang="<?=$lan?>"> <![endif]-->
+<!--[if IE 8 ]><html class="no-js ie ie8 lte8 lte9" lang="<?=$lan?>"> <![endif]-->
+<!--[if IE 9 ]><html class="no-js ie ie9 lte9" lang="<?=$lan?>"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--><html class="no-js ie ie9 lte9" lang="<?=$lan?>"><!--<![endif]-->
+<head><title>GET\POST\PUT\DELETE</title>
+	<script type="text/javascript" src="/jquery-1.10.2.js"></script>
+</head>
+<body>
+	<a id="a_get" href="javascript:;" onclick="">GET</a><br>
+	<a id="a_post" href="javascript:;" onclick="">POST</a><br>
+	<a id="a_put" href="javascript:;" onclick="">PUT</a><br>
+	<a id="a_delete" href="javascript:;" onclick="">DELETE</a><br>
+	<form id="post_form" action="/a.json" method="post" enctype="multipart/form-data" target="hidden_frame">
+		<label>METHOD:</label><br><input name="method" value="post"/><br>
+		<label>NAME:</label><br><input name="name" value="@E:/lli/ascii.art.txt"/><br>
+		<input name="submit" value="submit" type="button"/>
+	</form>
+	<iframe name="hidden_frame" charset="utf-8" id="hidden_frame" src="" width="800" height="600"></iframe>
+	<script type="text/javascript">
+	$(function() {
+		$('#a_get').on('click', function() {
+			$('#post_form input[name=method]').val('get');
+			$('#post_form').attr('method', 'get');
+		});
+		$('#a_post').on('click', function() {
+			$('#post_form input[name=method]').val('post');
+			$('#post_form').attr('method', 'post');
+		});
+		$('#a_put').on('click', function() {
+			$('#post_form input[name=method]').val('put');
+			$('#post_form').attr('method', 'put');
+		});
+		$('#a_delete').on('click', function() {
+			$('#post_form input[name=method]').val('delete');
+			$('#post_form').attr('method', 'delete');
+		});
+		$('#post_form input[name=submit]').on('click', function() {
+			var url = $('#post_form').attr('action');
+			var method = $('#post_form').attr('method');
+			var inputs = $('#post_form input');
+			var params = new FormData();
+			var headers = {};
+			for (var i = 0; i < inputs.length; i++) {
+				var name = $(inputs[i]).attr('name');
+				var value = $(inputs[i]).val();
+				//params[name] = value;
+				params.append(name, value);
+			};
+			$.ajax({
+				headers:{HTTP_X_HTTP_METHOD_OVERRIDE:method},
+		        type:method,
+		        url:url,
+		        data:params,
+		        timeout:90000,
+		        processData: false, // Don't process the files
+        		contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+		        beforeSend:function(){
+		            console.log('processing...');
+		        },
+		        //dataType: 'json',
+		        success:function(o){
+		            console.log('success', o);
+		        },
+		        complete:function(){
+		        },
+		        error:function(e){
+		            console.log('failure', e);
+		        }
+			});
+		});
+	});
+	</script>
+</body>
+</html>
