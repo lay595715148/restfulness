@@ -2,25 +2,25 @@
 use util\Util;
 
 class Autoloader {
-	private static $_classpath = __DIR__;
-	private static $_classes = array();
-	private static $_cachefile = 'restfulness.classes.php';
-	private static $_caches = array();
-	private static $_cached = false;
+    private static $_classpath = __DIR__;
+    private static $_classes = array();
+    private static $_cachefile = 'restfulness.classes.php';
+    private static $_caches = array();
+    private static $_cached = false;
     /**
      * 
      * @return void
      */
-	public static function register() {
+    public static function register() {
         // 使用自定义的autoload方法
         spl_autoload_register('Autoloader::autoload');
         // 注册异常句柄
         set_error_handler('Autoloader::handler');
         // 加载类文件路径缓存
         self::loadCache();
-
-
-	}
+        // 注册shutdown事件
+        register_shutdown_function('Autoloader::updateCache');
+    }
     /**
      * 自定义添加类文件路径
      * @param string $classname
@@ -37,11 +37,11 @@ class Autoloader {
      * @param string $classname
      * @return void
      */
-	public static function autoload($classname) {
+    public static function autoload($classname) {
         if(empty(self::$_classpath)) {
             self::check($classname);
         } else {
-        	$paths = explode(';', self::$_classpath);
+            $paths = explode(';', self::$_classpath);
             foreach($paths as $path) {
                 self::load($classname, $path);
             }
@@ -49,13 +49,13 @@ class Autoloader {
                 self::check($classname);
             }
         }
-	}
+    }
     /**
      * 
      * @return void
      */
-	private static function load($classname, $classpath = '', $suffixes = array('.php', '.class.php')) {
-		$classes = &self::$_classes;
+    private static function load($classname, $classpath = '', $suffixes = array('.php', '.class.php')) {
+        $classes = &self::$_classes;
         // 全名映射查找
         if(array_key_exists($classname, $classes)) {
             if(is_file($classes[$classname])) {
@@ -135,7 +135,7 @@ class Autoloader {
                 }
             }
         }
-	}
+    }
     /**
      * 加载类路径缓存
      *

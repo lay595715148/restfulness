@@ -14,6 +14,7 @@
 	<form id="post_form" action="/a.json" method="post" enctype="multipart/form-data" target="hidden_frame">
 		<label>METHOD:</label><br><input name="method" value="post"/><br>
 		<label>NAME:</label><br><input name="name" value="@E:/lli/ascii.art.txt"/><br>
+		<label>FILE:</label><br><input name="file" type="file" value="E:/lli/ascii.art.txt"/><br>
 		<input name="submit" value="submit" type="button"/>
 	</form>
 	<iframe name="hidden_frame" charset="utf-8" id="hidden_frame" src="" width="800" height="600"></iframe>
@@ -51,6 +52,7 @@
 				headers:{HTTP_X_HTTP_METHOD_OVERRIDE:method},
 		        type:method,
 		        url:url,
+        		cache: false,
 		        data:params,
 		        timeout:90000,
 		        processData: false, // Don't process the files

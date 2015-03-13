@@ -312,4 +312,84 @@ class Util {
     public static function createFolders($dir) {
         return is_dir($dir) | (self::createFolders(dirname($dir)) & mkdir($dir, 0777));
     }
+    /**
+     * 删除文件夹及文件夹内的文件
+     * @param string $dir
+     * @return boolean
+     */
+    public static function rmdir($dir) {
+        $dir = realpath($dir);
+        if (is_dir($dir) && $handle = opendir($dir)) {
+            while( false !== ($item = readdir($handle))) {
+                if ($item != "." && $item != "..") {
+                    if (is_dir("$dir/$item")) {
+                        $this->rmdir("$dir/$item");
+                    } else {
+                        unlink("$dir/$item");
+                    }
+                }
+            }
+            closedir($handle);
+            rmdir($dir);
+        } else {
+            return false;
+        }
+        return true;
+    }
+    /**
+     * 压缩文件夹
+     * @param string $dir
+     * @param string $dest
+     * @return boolean
+     */
+    public static function zip($dir, $dest) {
+        if(!is_dir($dir)) {
+            return false;
+        }
+        if(preg_match('/LINUX/i', PHP_OS)) {
+            $ret = @exec("tar -zcvf $dest $dir", $output, $return);
+        } else {
+            $zip = new ZipArchive();
+            $res = $zip->open($dest, ZipArchive::OVERWRITE);
+            if($res && is_dir($dir)) {
+                return self::zipdir($dir, '', $zip);
+            } else if($res && is_file($dir)) {
+                return $zip->addFile($dir);
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+     * 压缩文件夹至压缩包里的指定目录下
+     * @param string $dir
+     * @param string $pre 指定目录
+     * @param ZipArchive $zip
+     * @return boolean
+     */
+    private static function zipdir($dir, $pre, $zip) {
+        $ret = true;
+        $dir = realpath($dir) . "/";
+        $basename = basename($dir);
+        $predir = $pre . $basename . "/";
+        //添加目录
+        $ret = $zip->addEmptyDir($predir);
+        //添加文件
+        $handler = opendir($dir); //打开当前文件夹由$path指定。
+        while(($filename = readdir($handler)) !== false) {
+            if($filename != "." && $filename != "..") {//文件夹文件名字为'.'和'..'，不要对他们进行操作
+                if(is_dir($dir . $filename)) {// 如果读取的某个对象是文件夹，则递归
+                    $ret = $ret && self::zipdir($dir . $filename . "/", $predir, $zip);
+                } else { //将文件加入zip对象
+                    $ret = $ret && $zip->addFile($dir . $filename, $predir . $filename);
+                }
+            }
+            if(empty($ret)) {
+                break;
+            }
+        }
+        @closedir($dir);
+        return $ret;
+    }
 }
