@@ -12,6 +12,8 @@ class Autoloader {
      * @return void
      */
     public static function register() {
+        // 添加第三方库类文件目录
+        self::addpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
         // 使用自定义的autoload方法
         spl_autoload_register('Autoloader::autoload');
         // 注册异常句柄
@@ -20,6 +22,8 @@ class Autoloader {
         self::loadCache();
         // 注册shutdown事件
         register_shutdown_function('Autoloader::updateCache');
+        // Illuminate Suppport helpers
+        require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/Illuminate/Support/helpers.php';
     }
     /**
      * 自定义添加类文件路径
@@ -31,6 +35,23 @@ class Autoloader {
         $classes = &self::$_classes;
         if(is_file($filepath) && (! array_key_exists($classname, $classes) || $force)) {
             self::setCache($classname, realpath($filepath));
+        }
+    }
+    /**
+     * 增加一个类文件根目录
+     * @param string $classpath
+     *            类目录字符串
+     * @return void
+     */
+    public static function addpath($classpath) {
+        if(is_dir($classpath)) {
+            $classpaths = empty(self::$_classpath) ? array() : explode(';', self::$_classpath);
+            $classpaths[] = realpath($classpath);
+            $classpaths = array_unique($classpaths);
+            self::$_classpath = implode(';', $classpaths);
+            return true;
+        } else {
+            return false;
         }
     }
     /**
@@ -229,7 +250,7 @@ class Autoloader {
      * @return boolean
      */
     public static function exists($classname, $autoload = true) {
-        return class_exists($classname, $autoload) || interface_exists($classname, $autoload);
+        return class_exists($classname, $autoload) || interface_exists($classname, $autoload) || trait_exists($classname, $autoload);
     }
 
     /**

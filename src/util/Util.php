@@ -337,27 +337,25 @@ class Util {
         return true;
     }
     /**
-     * 压缩文件夹
+     * 压缩文件夹或文件
      * @param string $dir
      * @param string $dest
      * @return boolean
      */
-    public static function zip($dir, $dest) {
-        if(!is_dir($dir)) {
-            return false;
-        }
-        if(preg_match('/LINUX/i', PHP_OS)) {
-            $ret = @exec("tar -zcvf $dest $dir", $output, $return);
-        } else {
+    public static function zip($dir, $dest, $flags = ZipArchive::OVERWRITE) {
+        if(class_exists('ZipArchive') && (is_dir($dir) || is_file($dir))) {
             $zip = new ZipArchive();
-            $res = $zip->open($dest, ZipArchive::OVERWRITE);
+            $res = $zip->open($dest, $flags);
             if($res && is_dir($dir)) {
-                return self::zipdir($dir, '', $zip);
+                self::zipdir($dir, '', $zip);
             } else if($res && is_file($dir)) {
-                return $zip->addFile($dir);
+                $zip->addFile($dir);
             } else {
                 return false;
             }
+            $zip->close();
+        } else {
+            return false;
         }
         return true;
     }
@@ -391,5 +389,59 @@ class Util {
         }
         @closedir($dir);
         return $ret;
+    }
+    /**
+     * 是关联数组还是普通数组
+     * @param array $array
+     * @return boolean
+     */
+    function is_assoc_array($array) {
+        $keys = array_keys($array);
+        return array_keys($keys) !== $keys;
+    }
+    /**
+     * 根据参数构建url字符串
+     * url('/', array('a' => 1, 'b' => 2));
+     * /?a=1&b=2
+     * url('/?c=3', array('a' => 1, 'b' => 2, 'c' => false));
+     * /?a=1&b=2
+     * url('/', array('a' => 1, 'b' => 2, 'c' => 3), array('c' => 4));
+     * /?a=1&b=2&c=4
+     * @param string $url
+     * @param array $args
+     * @return string
+     */
+    function url($url, $args = null) {
+        $url = parse_url($url);
+        if (!isset($url['path']) || !$url['path'])
+            $url['path'] = '';
+        $query = array();
+        if (isset($url['query']))
+            parse_str($url['query'], $query);
+        if ($args !== null) {
+            foreach (array_slice(func_get_args(), 1) as $args) {
+                if (!is_array($args)) continue;
+                foreach ($args as $k => $v) {
+                    if ($v === false) {
+                        unset($query[$k]);
+                    } else {
+                        $query[$k] = $v;
+                    }
+                }
+            }
+        }
+        $result = '';
+        if (isset($url['scheme'])) $result .= $url['scheme'].'://';
+        if (isset($url['user'])) {
+            $result .= $url['user'];
+            if (isset($url['pass'])) $result .= ':'.$url['pass'];
+            $result .= '@';
+        }
+        if (isset($url['host'])) $result .= $url['host'];
+        if (isset($url['port'])) $result .= ':'.$url['port'];
+        $result .= $url['path'];
+        if ($query) $result .= '?'.http_build_query($query);
+        if (isset($url['fragment'])) $result .= '#'.$url['fragment'];
+        return $result;
     }
 }
