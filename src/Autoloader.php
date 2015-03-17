@@ -237,7 +237,7 @@ class Autoloader {
         $funs = spl_autoload_functions();
         $count = count($funs);
         foreach($funs as $i => $fun) {
-            if($fun[0] == 'App' && $fun[1] == 'autoload' && $count == $i + 1) {
+            if($fun[0] == 'Autoloader' && $fun[1] == 'autoload' && $count == $i + 1) {
                 throw new Exception($classname.' not found by autoload function');
             }
         }

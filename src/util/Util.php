@@ -395,7 +395,7 @@ class Util {
      * @param array $array
      * @return boolean
      */
-    function is_assoc_array($array) {
+    public static function is_assoc_array($array) {
         $keys = array_keys($array);
         return array_keys($keys) !== $keys;
     }
@@ -411,7 +411,7 @@ class Util {
      * @param array $args
      * @return string
      */
-    function url($url, $args = null) {
+    public static function url($url, $args = null) {
         $url = parse_url($url);
         if (!isset($url['path']) || !$url['path'])
             $url['path'] = '';
@@ -443,5 +443,69 @@ class Util {
         if ($query) $result .= '?'.http_build_query($query);
         if (isset($url['fragment'])) $result .= '#'.$url['fragment'];
         return $result;
+    }
+    /**
+     * 2到62，任意进制转换
+     * @param string $number: 转换的数字
+     * @param string $from: 本来的进制
+     * @param string $to: 转换到进制
+     * @param string $use_bcmath: 是否使用bcmath模块处理超大数字
+     */
+    public static function base_convert($number, $from, $to, $use_bcmath = null) {
+        $base = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $loaded = extension_loaded('bcmath');
+        if ($use_bcmath && !$loaded)
+            throw new \RuntimeException('Require bcmath extension!');
+        $use_bcmath = $loaded;
+        // 任意进制转换为十进制
+        $any2dec = function($number, $from) use ($base, $use_bcmath) {
+            if ($from === 10)
+                return $number;
+            $base = substr($base, 0, $from);
+            $dec = 0;
+            $number = (string)$number;
+            for ($i = 0, $len = strlen($number); $i < $len; $i++) {
+                $c = substr($number, $i , 1);
+                $n = strpos($base, $c);
+                if ($n === false)   // 出现了当前进制不支持的数字
+                    trigger_error('Unexpected base character: '. $c, E_USER_ERROR);
+                $pos = $len - $i - 1;
+                if ($use_bcmath) {
+                    $dec = bcadd($dec, bcmul($n, bcpow($from, $pos)));
+                } else {
+                    $dec += $n * pow($from, $pos);
+                }
+            }
+            return $dec;
+        };
+        // 十进制转换为任意进制
+        $dec2any = function($number, $to) use ($base, $use_bcmath) {
+            if ($to === 10)
+                return $number;
+            $base = substr($base, 0, $to);
+            $any = '';
+            while ($number >= $to) {
+                if ($use_bcmath) {
+                    list($number, $c) = array(bcdiv($number, $to), bcmod($number, $to));
+                } else {
+                    list($number, $c) = array((int)($number / $to), $number % $to);
+                }
+                $any = substr($base, $c, 1) . $any;
+            }
+            $any = substr($base, $number, 1) . $any;
+            return $any;
+        };
+        ////////////////////////////////////////////////////////////////////////////////
+        $from = (int)$from;
+        $to = (int)$to;
+        $min_base = 2;
+        $max_base = strlen($base);
+        if ($from < $min_base || $from > $max_base || $to < $min_base || $to > $max_base)
+            trigger_error("Only support base between {$min_base} and {$max_base}", E_USER_ERROR);
+        if ($from === $to)
+            return $number;
+        // 转换为10进制
+        $dec = ($from === 10) ? $number : $any2dec($number, $from);
+        return $dec2any($dec, $to);
     }
 }

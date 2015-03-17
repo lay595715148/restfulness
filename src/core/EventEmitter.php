@@ -1,7 +1,7 @@
 <?php
 namespace core;
 
-class Event {
+class EventEmitter {
     protected $listen = array();
     protected $subscribe = array();
     public function listen($object, $event, $callback) {
