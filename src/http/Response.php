@@ -1,17 +1,18 @@
 <?php
-namespace http;
+namespace Lay\Http;
 
-use core\Session;
+use Lay\Traits\Singleton;
+use Lay\Core\Session;
 
 class Response {
-    use \traits\Singleton;
-    protected $code = HTTP::OK;
+    use Singleton;
+    protected $code = Http::OK;
     protected $header = array();
     protected $cookie = array();
     protected $body;
     public function execute() {
         list($header, $body) = $this->compile();
-        Session::getInstance()->commit();
+        //Session::getInstance()->commit();
         if (!headers_sent()) {
             array_map('header', $header);
             $this->header = array();
@@ -67,11 +68,11 @@ class Response {
         );
     }
     public function reset() {
-        $this->code = HTTP::OK;
+        $this->code = Http::OK;
         $this->header = array();
         $this->cookie = array();
         $this->body = null;
-        Session::getInstance()->reset();
+        //Session::getInstance()->reset();
         return $this;
     }
     public function redirect($url, $code = 303) {
@@ -82,7 +83,7 @@ class Response {
     //////////////////// protected method ////////////////////
     protected function compileHeader() {
         $header = array();
-        $header[] = HTTP::getStatusHeader($this->code ?: 200);
+        $header[] = Http::getStatusHeader($this->code ?: 200);
         foreach ($this->header as $key => $val)
             $header[] = $val === null
                       ? $key

@@ -1,8 +1,8 @@
 <?php
-namespace util;
+namespace Lay\Util;
 
-use http\Request;
-use http\Response;
+use Lay\Http\Request;
+use Lay\Http\Response;
 
 class RESTful {
     protected static $_supported_http_methods = array('get', 'delete', 'post', 'put', 'options', 'patch', 'head');
@@ -131,7 +131,7 @@ class RESTful {
         switch ($rep) {
             case 'json':
                 $ret = json_decode($body, true);
-                $ret = $ret !== null ? $ret : array('code' => 0, 'data'=> $rsp);
+                $ret = $ret !== null ? $ret : array('code' => 0, 'data'=> $body);
                 break;
             default:
                 $ret = $body;

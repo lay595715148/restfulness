@@ -1,5 +1,5 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
 abstract class AbstractSingleton {
     protected static $_singletonStack = array();

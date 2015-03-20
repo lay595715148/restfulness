@@ -1,11 +1,15 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
-use core\EventEmitter;
+use Lay\Core\EventEmitter;
+use Lay\Http\Request;
+use Lay\Http\Response;
+
+use Lay\Traits\Singleton;
 
 abstract class Action extends AbstractAction {
-	use traits\Singleton;
-	use traits\Action;
+	use Singleton;
+	//use Lay\Traits\Action;
     /**
      * 事件常量，创建时
      *
@@ -81,20 +85,75 @@ abstract class Action extends AbstractAction {
     
 
     /**
+     * HttpRequest
+     * @var HttpRequest
+     */
+    protected $request;
+    /**
+     * HttpResponse
+     * @var HttpResponse
+     */
+    protected $response;
+    /**
+     * 存放业务逻辑对象的数组
+     * @var array
+    */
+    protected $services = array();
+    /**
+     * 模板引擎对象
+     * @var Template
+    */
+    protected $template;
+    
+    /**
      * 构造方法
      *
      * @param string $name 名称
      * @param Template $template 模板引擎对象
      */
-    protected function __construct($name) {
-        $this->name = $name;
-        $this->request = new HttpRequest();
-        $this->response = new HttpResponse();
-        $this->template = new Template($this->request, $this->response);
+    protected function __construct() {
+        //$this->name = get_called_class();
+        $this->request = Request::getInstance();
+        $this->response = Response::getInstance();
+        //$this->template = new Template($this->request, $this->response);
         //EventEmitter::on(self::E_CREATE, array($this, 'onCreate'), 1);
         //PluginManager::exec(self::H_CREATE, array($this));
         //EventEmitter::emit(self::E_CREATE, array($this));
     }
+
+    /**
+     * 返回HttpRequest
+     * @return HttpRequest
+     */
+    public function getRequest() {
+        return $this->request;
+    }
+    /**
+     * 返回HttpReponse
+     * @return HttpReponse
+     */
+     public function getResponse() {
+        return $this->response;
+    }
+    /**
+     * 返回模板引擎对象
+     * @return Template
+     */
+    public function getTemplate() {
+        return $this->template;
+    }
+    /**
+     * 获取Service对象
+     * @param string $classname
+     * @return Service
+     */
+    public function service($classname) {
+        if(!array_key_exists($classname, $this->services) && class_exists($classname)) {
+            $this->services[$classname] = $classname::getInstance();
+        }
+        return $this->services[$classname];
+    }
+
     /**
      * 创建事件触发方法
      * @see \lay\core\AbstractAction::onCreate()
@@ -136,6 +195,21 @@ abstract class Action extends AbstractAction {
      * @see \lay\core\AbstractAction::onPost()
      */
     public function onPost() {
+        
+    }
+    public function onPut() {
+        
+    }
+    public function onDelete() {
+        
+    }
+    public function onPatch() {
+        
+    }
+    public function onHead() {
+        
+    }
+    public function onOptions() {
         
     }
     /**

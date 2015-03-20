@@ -1,5 +1,5 @@
 <?php
-namespace cls;
+namespace Cls;
 
 class Standard {
 

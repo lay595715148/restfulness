@@ -1,5 +1,5 @@
 <?php
-namespace trait;
+namespace Lay\Traits;
 
 // 单例模式
 trait Singleton {

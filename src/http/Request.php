@@ -1,31 +1,44 @@
 <?php
-namespace http;
+namespace Lay\Http;
 
-class Request {
-    use \traits\Singleton;
+use Lay\Traits\Singleton;
+use Lay\Core\AbstractSingleton;
+
+class Request extends AbstractSingleton {
+    //use Singleton;
     private $method;
+    private $pathinfo;
     private $request_uri;
     public function getHeader($key) {
         $key = 'http_'. str_replace('-', '_', $key);
-        return server($key);
+        return $this->server($key);
     }
     public function getRequestURI() {
         if ($this->request_uri) {
             return $this->request_uri;
         }
-        if ($uri = server('request_uri')) {
+        if ($uri = $this->server('request_uri')) {
             return $this->request_uri = $uri;
         }
         throw new \RuntimeException('Unknown request URI');
+    }
+    public function getPathinfo() {
+        if ($this->pathinfo) {
+            return $this->pathinfo;
+        }
+        if($pathinfo = pathinfo(preg_replace('/^(.*)(\?)(.*)$/', '$1', $this->getRequestURI()))) {
+            return $this->pathinfo = $pathinfo;
+        }
+        throw new \RuntimeException('Unknown request pathinfo');
     }
     public function getMethod() {
         if ($this->method) {
             return $this->method;
         }
-        $method = strtoupper($this->header('x-http-method-override') ?: server('request_method'));
+        $method = strtoupper($this->header('x-http-method-override') ?: $this->server('request_method'));
         if ($method != 'POST') return $this->method = $method;
         // 某些js库的ajax封装使用这种方式
-        $method = post('_method') ?: $method;
+        $method = $this->post('_method') ?: $method;
         unset($_POST['_method']);
         return $this->method = strtoupper($method);
     }
@@ -53,12 +66,12 @@ class Request {
         return strtolower($this->header('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
     public function getReferer() {
-        return server('http_referer');
+        return $this->server('http_referer');
     }
     public function getIP($proxy = null) {
         $ip = $proxy
-            ? server('http_x_forwarded_for') ?: server('remote_addr')
-            : server('remote_addr');
+            ? $this->server('http_x_forwarded_for') ?: $this->server('remote_addr')
+            : $this->server('remote_addr');
         if (strpos($ip, ',') === false)
             return $ip;
         // private ip range, ip2long()
@@ -118,7 +131,7 @@ class Request {
     }
     //////////////////// protected method ////////////////////
     protected function getAccept($header_key) {
-        if (!$accept = server($header_key))
+        if (!$accept = $this->server($header_key))
             return array();
         $result = array();
         $accept = strtolower($accept);
@@ -167,6 +180,61 @@ class Request {
      */
     public function header($key) {
         return $this->getHeader($key);
+    }
+
+    public function get($key = null) {
+        if ($key === null) return $_GET;
+        return isset($_GET[$key]) ? $_GET[$key] : null;
+    }
+    public function post($key = null) {
+        if ($key === null) return $_POST;
+        return isset($_POST[$key]) ? $_POST[$key] : null;
+    }
+    public function cookie($key = null) {
+        if ($key === null) return $_COOKIE;
+        return isset($_COOKIE[$key]) ? $_COOKIE[$key] : null;
+    }
+    public function put($key = null) {
+        static $_PUT = null;
+        if ($_PUT === null) {
+            if (self::req()->isPUT()) {
+                if (strtoupper($this->server('request_method')) == 'PUT') {
+                    parse_str(file_get_contents('php://input'), $_PUT);
+                } else {
+                    $_PUT =& $_POST;
+                }
+            } else {
+                $_PUT = array();
+            }
+        }
+        if ($key === null) return $_PUT;
+        return isset($_PUT[$key]) ? $_PUT[$key] : null;
+    }
+    public function request($key = null) {
+        if ($key === null) return array_merge(put(), $_REQUEST);
+        return isset($_REQUEST[$key]) ? $_REQUEST[$key] : put($key);
+    }
+    public function has_get($key) {
+        return array_key_exists($key, $_GET);
+    }
+    public function has_post($key) {
+        return array_key_exists($key, $_POST);
+    }
+    public function has_put($key) {
+        return array_key_exists($key, self::put());
+    }
+    public function has_request($key) {
+        return array_key_exists($key, $_REQUEST);
+    }
+    public function env($key = null) {
+        if ($key === null) return $_ENV;
+        $key = strtoupper($key);
+        return isset($_ENV[$key]) ? $_ENV[$key] : false;
+    }
+    public function server($key = null) {
+        if ($key === null) return $_SERVER;
+        $key = strtoupper($key);
+        return isset($_SERVER[$key]) ? $_SERVER[$key] : false;
     }
 }
 

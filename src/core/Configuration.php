@@ -4,9 +4,9 @@
  *
  * @author Lay Li
  */
-namespace core;
+namespace Lay\Core;
 
-use core\AbstractSingleton;
+//use core\AbstractSingleton;
 
 /**
  * 配置数据访问类
@@ -102,13 +102,13 @@ class Configuration extends AbstractSingleton {
      */
     public function setter($keystr, $value) {
         if(! $this->checkKey($keystr)) {
-            Logger::warn('given key isnot supported;string,int is ok.', 'CONFIGURATION');
+            //Logger::warn('given key isnot supported;string,int is ok.', 'CONFIGURATION');
         } else {
             if(! $this->checkValue($value)) {
-                Logger::warn('given value isnot supported;string,number,boolean is ok.', 'CONFIGURATION');
+                //Logger::warn('given value isnot supported;string,number,boolean is ok.', 'CONFIGURATION');
             } else {
                 if(! $this->checkKeyValue($keystr, $value)) {
-                    Logger::warn('given key and value isnot match;if key is array,value must be array.', 'CONFIGURATION');
+                    //Logger::warn('given key and value isnot match;if key is array,value must be array.', 'CONFIGURATION');
                 } else {
                     $node = &$this->configuration;
                     if(is_array($keystr) && $keystr) {
@@ -121,7 +121,7 @@ class Configuration extends AbstractSingleton {
                         foreach($keys as $index => $key) {
                             if(isset($node[$key]) && $index === $count - 1) {
                                 // warning has been configured by this name
-                                Logger::warn('$configuration["' . implode('"]["', $keys) . '"] has been configured.', 'CONFIGURATION');
+                                //Logger::warn('$configuration["' . implode('"]["', $keys) . '"] has been configured.', 'CONFIGURATION');
                                 $node[$key] = $value;
                             } else if(isset($node[$key])) {
                                 $node = &$node[$key];

@@ -1,5 +1,5 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
 // 会话之间的上下文数据封装
 abstract class ContextHandler {

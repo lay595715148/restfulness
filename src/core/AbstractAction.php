@@ -1,7 +1,7 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
-class AbstractAction {
+abstract class AbstractAction {
     /**
      * 创建事件触发方法
      */

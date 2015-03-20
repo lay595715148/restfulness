@@ -1,5 +1,7 @@
 <?php
-use util\Util;
+namespace Lay;
+
+use Lay\Util\Util;
 
 class Autoloader {
     private static $_classpath = __DIR__;
@@ -15,15 +17,19 @@ class Autoloader {
         // 添加第三方库类文件目录
         self::addpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
         // 使用自定义的autoload方法
-        spl_autoload_register('Autoloader::autoload');
+        spl_autoload_register(array('Lay\Autoloader', 'autoload'));
         // 注册异常句柄
-        set_error_handler('Autoloader::handler');
+        //set_error_handler(array('Lay\Autoloader', 'handler'));
         // 加载类文件路径缓存
         self::loadCache();
         // 注册shutdown事件
-        register_shutdown_function('Autoloader::updateCache');
+        register_shutdown_function(array('Lay\Autoloader', 'updateCache'));
         // Illuminate Suppport helpers
         require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/Illuminate/Support/helpers.php';
+        // underscore
+        require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/underscore.php';
+        // klein
+        // require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/klein.php';
     }
     /**
      * 自定义添加类文件路径
@@ -81,17 +87,23 @@ class Autoloader {
         if(array_key_exists($classname, $classes)) {
             if(is_file($classes[$classname])) {
                 require_once $classes[$classname];
+                return true;
             } else if(is_file($classpath . $classes[$classname])) {
                 require_once $classpath . $classes[$classname];
+                return true;
             }
         }
         if(! self::exists($classname, false)) {
             $tmparr = explode("\\", $classname);
             // 通过命名空间查找
             if(count($tmparr) > 1) {
+                //命名空间以'Lay'打头的特殊处理
+                if($tmparr[0] == 'Lay') {
+                    array_shift($tmparr);
+                }
                 $name = array_pop($tmparr);
                 $path = $classpath . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $tmparr);
-                $required = false;
+                // $required = false;
                 // 命名空间文件夹查找
                 if(is_dir($path)) {
                     $tmppath = $path . DIRECTORY_SEPARATOR . $name;
@@ -100,7 +112,8 @@ class Autoloader {
                             $filepath = realpath($tmppath . $suffix);
                             self::setCache($classname, $filepath);
                             require_once $filepath;
-                            break;
+                            return true;
+                            //break;
                         }
                     }
                 }
@@ -118,7 +131,8 @@ class Autoloader {
                     $filepath = realpath($tmppath . $suffix);
                     self::setCache($classname, $filepath);
                     require_once $filepath;
-                    break;
+                    return true;
+                    //break;
                 }
             }
         }
@@ -136,7 +150,8 @@ class Autoloader {
                             $filepath = realpath($tmppath . $suffix);
                             self::setCache($classname, $filepath);
                             require_once $filepath;
-                            break 2;
+                            return true;
+                            //break 2;
                         }
                     }
                     continue;
@@ -146,7 +161,8 @@ class Autoloader {
                             $filepath = realpath(($isfile ? $path : $lowerpath) . $suffix);
                             self::setCache($classname, $filepath);
                             require_once $filepath;
-                            break 2;
+                            return true;
+                            //break 2;
                         }
                     }
                     break;
@@ -156,6 +172,7 @@ class Autoloader {
                 }
             }
         }
+        return false;
     }
     /**
      * 加载类路径缓存
@@ -232,13 +249,13 @@ class Autoloader {
      * @return void
      * @throws Exception
      */
-    private static function check() {
+    private static function check($classname) {
         // 判断是否还有其他自动加载函数，如没有则抛出异常
         $funs = spl_autoload_functions();
         $count = count($funs);
         foreach($funs as $i => $fun) {
-            if($fun[0] == 'Autoloader' && $fun[1] == 'autoload' && $count == $i + 1) {
-                throw new Exception($classname.' not found by autoload function');
+            if($fun[0] == 'Lay\Autoloader' && $fun[1] == 'autoload' && $count == $i + 1) {
+                throw new \Exception($classname.' not found by autoload function');
             }
         }
     }
@@ -263,7 +280,7 @@ class Autoloader {
      * @return void
      */
     public static function handler($errno, $errstr, $errfile, $errline, $errcontext) {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 }
 

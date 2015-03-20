@@ -1,5 +1,5 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
 class AbstractService {
 
