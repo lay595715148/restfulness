@@ -15,73 +15,55 @@ abstract class Action extends AbstractAction {
      *
      * @var string
      */
-    const E_CREATE = 'action:create';
+    const E_CREATE = 'action:event:create';
     /**
      * 事件常量，GET时
      *
      * @var string
      */
-    const E_GET = 'action:get';
+    const E_GET = 'action:event:get';
     /**
      * 事件常量，POST时
      *
      * @var string
      */
-    const E_POST = 'action:post';
+    const E_POST = 'action:event:post';
     /**
      * 事件常量，PUT
      *
      * @var string
      */
-    const E_PUT = 'action:put';
+    const E_PUT = 'action:event:put';
     /**
      * 事件常量，DELETE
      *
      * @var string
      */
-    const E_DELETE = 'action:delete';
+    const E_DELETE = 'action:event:delete';
     /**
      * 事件常量，HEAD
      *
      * @var string
      */
-    const E_HEAD = 'action:head';
+    const E_HEAD = 'action:event:head';
     /**
      * 事件常量，PATCH
      *
      * @var string
      */
-    const E_PATCH = 'action:patch';
+    const E_PATCH = 'action:event:patch';
     /**
      * 事件常量，OPTIONS
      *
      * @var string
      */
-    const E_OPTIONS = 'action:options';
+    const E_OPTIONS = 'action:event:options';
     /**
      * 事件常量，结束时
      *
      * @var string
      */
-    const E_STOP = 'action_stop';
-    /**
-     * 钩子常量，创建时
-     *
-     * @var string
-     */
-    const H_CREATE = 'hook_action_create';
-    /**
-     * 事件常量，摧毁时
-     *
-     * @var string
-     */
-    const E_DESTROY = 'action_destroy';
-    /**
-     * 钩子常量，结束时
-     *
-     * @var string
-     */
-    const H_STOP = 'hook_action_stop';
+    const E_STOP = 'action:event:stop';
     
 
     /**

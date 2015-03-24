@@ -1,7 +1,9 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
-class EventEmitter {
+use Lay\Core\AbstractSingleton;
+
+class EventEmitter extends AbstractSingleton {
     protected $listen = array();
     protected $subscribe = array();
     public function listen($object, $event, $callback) {

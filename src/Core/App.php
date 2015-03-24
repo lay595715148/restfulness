@@ -2,7 +2,9 @@
 namespace Lay\Core;
 //核心类
 //use Core\AbstractSingleton;
-use Lay\Core\Configuration as Config;
+use Lay\Core\Configuration;
+use Lay\Core\EventEmitter;
+use Lay\Core\Action;
 use Lay\Util\Util;
 use Lay\Util\RESTful;
 //use Lay\Autoloader;
@@ -23,7 +25,14 @@ use Lay\Cgi\Index as CgiIndex;
 use Lay\Cli\Index as CliIndex;
 
 class App extends AbstractSingleton {
+    const E_BEFORE = 'app:event:before';
+    const E_RUN = 'app:event:run';
+    const E_AFTER = 'app:event:after';
+    const E_FINISH = 'app:event:finish';
 	public static $_rootpath;
+    public static $_config;
+    public static $_event;
+    public static $_app;
     /**
      * @return core\App
      */
@@ -31,12 +40,24 @@ class App extends AbstractSingleton {
     	return parent::getInstance();
     }
 	public static function start() {
-		static::$_rootpath = dirname(dirname(__DIR__));
+		self::$_rootpath = dirname(dirname(__DIR__));
 
-		$app = static::getInstance();
+        self::$_event = $event = EventEmitter::getInstance();
+
+		self::$_app = $app = self::getInstance();
+
+        Configuration::initialize();
+        // before
+        $event->fire($this, self::E_BEFORE, array($this));
 		$app->brfore();
+        // run
+        $event->fire($this, self::E_RUN, array($this));
 		$app->run();
+        // after
+        $event->fire($this, self::E_AFTER, array($this));
 		$app->after();
+        // finish
+        $event->fire($this, self::E_FINISH, array($this));
 		$app->finish();
 	}
 	/**
@@ -45,144 +66,79 @@ class App extends AbstractSingleton {
 	 */
 	private $klein;
 	public function brfore() {
-		$rootpath = App::$_rootpath;
-		$configfile = $rootpath . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'env.php';
-		static::configure($configfile);
 	}
+    private function lifecycle($action) {
+        $request = Request::getInstance();
+        self::$_event->fire($action, Action::E_CREATE, array($action));
+        $action->onCreate();
+        $method = $request->getMethod();
+        switch (strtoupper($method)) {
+            case 'POST':
+                $event = Action::E_POST;
+                break;
+            case 'PUT':
+                $event = Action::E_PUT;
+                break;
+            case 'DELETE':
+                $event = Action::E_DELETE;
+                break;
+            case 'PATCH':
+                $event = Action::E_PATCH;
+                break;
+            case 'HEAD':
+                $event = Action::E_HEAD;
+                break;
+            case 'OPTIONS':
+                $event = Action::E_OPTIONS;
+                break;
+            case 'GET':
+            default:
+                $event = Action::E_GET;
+                break;
+        }
+        $fnname = 'on' . ucfirst(strtolower($method));
+        self::$_event->fire($action, $event, array($action));
+        $action->{$fnname}();
+        self::$_event->fire($action, Action::E_STOP, array($action));
+        $action->onStop();
+    }
 	public function run() {
 		global $_PUT, $_DELETE, $_PATCH, $_HEAD, $_OPTIONS;
 		$request = Request::getInstance();
-		$this->klein = $klein = new Klein();
-		$routers = Config::get('routers') ? : array();
-
-		foreach ($routers as $k => $config) {
-			$klein->respond($k, function($req, $res) use ($klein, $config, $request) {
-				$classname = $config['class'];
-				if(class_exists($classname) && $action = $classname::getInstance()) {
-					$method = $request->getMethod();
-					$fnname = 'on' . ucfirst(strtolower($method));
-					$action->{$fnname}();
-					$action->onStop();
-				} else {
-					throw new \Exception($classname . ' not found!');
-				}
-			});
-		}
-		$klein->dispatch();
-
-		/*$pathinfo = $request->getPathinfo();
-		extract($pathinfo);
-		$classname = trim(preg_replace('/\//', '\\', $dirname . DIRECTORY_SEPARATOR . $filename), '\\ ');
-		if(strtoupper(php_sapi_name()) == 'CLI') {
-			$classname = '\\Lay\\Cli\\' . implode('\\', array_map('ucfirst', explode('\\', $classname)));
-		} else {
-			$classname = '\\Lay\\Cgi\\' . implode('\\', array_map('ucfirst', explode('\\', $classname)));
-		}
-		if(class_exists($classname)) {
-			$action = $classname::getInstance();
-		} else {
-			throw new \Exception($classname . ' not found!');
-		}
-
-
-		$action->onCreate();
-		$method = $request->getMethod();
-		$fnname = 'on' . ucfirst(strtolower($method));
-		$action->{$fnname}();
-		$action->onStop();*/
-		return;
-	}
-	public function route() {
-
-	}
-	public function after() {
-		
-	}
-	public function finish() {
-		
-	}
-	/**
-     * 加载并设置配置
-     *
-     * @param string|array $configuration
-     *            配置文件或配置数组
-     * @param boolean $isFile
-     *            标记是否是配置文件
-     * @return void
-     */
-    public function configure($configuration, $isFile = true) {
-        $_ROOTPATH = &static::$_rootpath;
-        if(is_array($configuration) && ! $isFile) {
-            foreach($configuration as $key => $item) {
-                if(is_string($key) && $key) { // key is not null
-                    switch($key) {
-                        case 'actions':
-                        case 'services':
-                        case 'stores':
-                        case 'beans':
-                        case 'models':
-                        case 'templates':
-                            if(is_array($item)) {
-                                $actions = static::get($key);
-                                foreach($item as $name => $conf) {
-                                    if(is_array($actions) && array_key_exists($name, $actions)) {
-                                        //Logger::warn('$configuration["' . $key . '"]["' . $name . '"] has been configured', 'CONFIGURE');
-                                    } else if(is_string($name) || is_numeric($name)) {
-                                        static::set($key . '.' . $name, $conf);
-                                    }
-                                }
-                            } else {
-                                //Logger::warn('$configuration["' . $key . '"] is not an array', 'CONFIGURE');
-                            }
-                            break;
-                        case 'files':
-                            if(is_array($item)) {
-                                foreach($item as $file) {
-                                    static::configure($file);
-                                }
-                            } else if(is_string($item)) {
-                                $this->configure($item);
-                            } else {
-                                //Logger::warn('$configuration["files"] is not an array or string', 'CONFIGURE');
-                            }
-                            break;
-                        case 'logger':
-                            // update Logger
-                            //Logger::initialize($item);
-                        default:
-                            static::set($key, $item);
-                            break;
-                    }
-                } else {
-                    static::set($key, $item);
-                }
-            }
-        } else if(is_array($configuration)) {
-            if(! empty($configuration)) {
-                foreach($configuration as $index => $configfile) {
-                    $this->configure($configfile);
-                }
-            }
-        } else if(is_string($configuration)) {
-            //Logger::info('configure file:' . $configuration, 'CONFIGURE');
-            if(is_file($configuration)) {
-                $tmparr = include_once $configuration;
-            } else if(is_file($_ROOTPATH . $configuration)) {
-                $tmparr = include_once $_ROOTPATH . $configuration;
+        if(strtoupper(php_sapi_name()) == 'CLI') {
+            $pathinfo = $request->getPathinfo();
+            extract($pathinfo);
+            $classname = '\\Lay\\Cli\\' . implode('\\', array_map('ucfirst', explode('\\', $classname)));
+            if(class_exists($classname) && $action = $classname::getInstance()) {
+                $this->lifecycle($action);
             } else {
-                //Logger::warn($configuration . ' is not a real file', 'CONFIGURE');
-                $tmparr = array();
-            }
-            
-            if(empty($tmparr)) {
-                $this->configure($tmparr);
-            } else {
-                $this->configure($tmparr, false);
+                throw new \Exception($classname . ' not found!');
             }
         } else {
-            //Logger::warn('unkown configuration type', 'CONFIGURE');
+            $this->klein = $klein = new Klein();
+            $routers = self::get('routers', array());
+            
+            foreach ($routers as $k => $config) {
+                $klein->respond($k, function($req, $res) use ($klein, $config, $request) {
+                    $classname = $config['class'];
+                    if(class_exists($classname) && $action = $classname::getInstance()) {
+                        $this->lifecycle($action);
+                    } else {
+                        throw new \Exception($classname . ' not found!');
+                    }
+                });
+            }
+            $klein->dispatch();
         }
-    }
+	}
+	public function after() {
+	}
+	public function finish() {
+		if(function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+	}
+
     /**
      * 设置某个配置项
      *
