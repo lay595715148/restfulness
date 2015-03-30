@@ -30,6 +30,7 @@ class App extends AbstractSingleton {
     const E_AFTER = 'app:event:after';
     const E_FINISH = 'app:event:finish';
 	public static $_rootpath;
+    public static $_action;
     public static $_config;
     public static $_event;
     public static $_app;
@@ -39,78 +40,69 @@ class App extends AbstractSingleton {
     public static function getInstance() {
     	return parent::getInstance();
     }
+    /**
+     * 运行，创建App并启动App的生命同期
+     * @return void
+     */
 	public static function start() {
+        //ob start
+        ob_start();
+        ini_set('output_buffering', 'on');
+        ini_set('implicit_flush', 'off');
+        // initialize root path
 		self::$_rootpath = dirname(dirname(__DIR__));
-
-        self::$_event = $event = EventEmitter::getInstance();
-
-		self::$_app = $app = self::getInstance();
-
-        Configuration::initialize();
-        // before
-        $event->fire($this, self::E_BEFORE, array($this));
-		$app->brfore();
-        // run
-        $event->fire($this, self::E_RUN, array($this));
-		$app->run();
-        // after
-        $event->fire($this, self::E_AFTER, array($this));
-		$app->after();
-        // finish
-        $event->fire($this, self::E_FINISH, array($this));
-		$app->finish();
+        // initialize EventEmitter
+        self::$_event = EventEmitter::getInstance();
+        self::$_event->initialize();
+        // initialize Configuration
+        self::$_config = Configuration::getInstance();
+        self::$_config->initialize();
+        // initialize App
+        self::$_app = self::getInstance();
+        self::$_app->initialize();
+        self::$_app->lifecycle();
 	}
 	/**
 	 *
 	 * @see https://github.com/chriso/klein.php
 	 */
 	private $klein;
-	public function brfore() {
-	}
-    private function lifecycle($action) {
-        $request = Request::getInstance();
-        self::$_event->fire($action, Action::E_CREATE, array($action));
-        $action->onCreate();
-        $method = $request->getMethod();
-        switch (strtoupper($method)) {
-            case 'POST':
-                $event = Action::E_POST;
-                break;
-            case 'PUT':
-                $event = Action::E_PUT;
-                break;
-            case 'DELETE':
-                $event = Action::E_DELETE;
-                break;
-            case 'PATCH':
-                $event = Action::E_PATCH;
-                break;
-            case 'HEAD':
-                $event = Action::E_HEAD;
-                break;
-            case 'OPTIONS':
-                $event = Action::E_OPTIONS;
-                break;
-            case 'GET':
-            default:
-                $event = Action::E_GET;
-                break;
-        }
-        $fnname = 'on' . ucfirst(strtolower($method));
-        self::$_event->fire($action, $event, array($action));
-        $action->{$fnname}();
-        self::$_event->fire($action, Action::E_STOP, array($action));
-        $action->onStop();
+    /**
+     * App初始化
+     * @return void
+     */
+    public function initialize() {
     }
-	public function run() {
+    /**
+     * App生命同期
+     * @return void
+     */
+    public function lifecycle() {
+        // before
+        $this->brfore();
+        App::$_event->fire($this, App::E_BEFORE, array($this));
+        // run
+        $this->run();
+        App::$_event->fire($this, App::E_RUN, array($this));
+        // after
+        $this->after();
+        App::$_event->fire($this, App::E_AFTER, array($this));
+        // finish
+        $this->finish();
+        App::$_event->fire($this, App::E_FINISH, array($this));
+    }
+	protected function brfore() {
+	}
+	protected function run() {
 		global $_PUT, $_DELETE, $_PATCH, $_HEAD, $_OPTIONS;
 		$request = Request::getInstance();
         if(strtoupper(php_sapi_name()) == 'CLI') {
             $pathinfo = $request->getPathinfo();
             extract($pathinfo);
             $classname = '\\Lay\\Cli\\' . implode('\\', array_map('ucfirst', explode('\\', $classname)));
-            if(class_exists($classname) && $action = $classname::getInstance()) {
-                $this->lifecycle($action);
+            if(class_exists($classname) && self::$_action = $classname::getInstance()) {
+                self::$_action->initialize();
+                self::$_action->lifecycle();
             } else {
                 throw new \Exception($classname . ' not found!');
             }
@@ -121,8 +113,9 @@ class App extends AbstractSingleton {
             foreach ($routers as $k => $config) {
                 $klein->respond($k, function($req, $res) use ($klein, $config, $request) {
                     $classname = $config['class'];
-                    if(class_exists($classname) && $action = $classname::getInstance()) {
-                        $this->lifecycle($action);
+                    if(class_exists($classname) && self::$_action = $classname::getInstance()) {
+                        self::$_action->initialize();
+                        self::$_action->lifecycle();
                     } else {
                         throw new \Exception($classname . ' not found!');
                     }
@@ -131,9 +124,9 @@ class App extends AbstractSingleton {
             $klein->dispatch();
         }
 	}
-	public function after() {
+	protected function after() {
 	}
-	public function finish() {
+	protected function finish() {
 		if(function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }

@@ -3,12 +3,20 @@ namespace Lay\Http;
 
 use Lay\Traits\Singleton;
 use Lay\Core\AbstractSingleton;
+use HttpRequest;
 
 class Request extends AbstractSingleton {
     //use Singleton;
-    private $method;
-    private $pathinfo;
-    private $request_uri;
+    protected $httpRequest;
+    protected $method;
+    protected $pathinfo;
+    protected $request_uri;
+    protected function __construct() {
+        $this->httpRequest = new HttpRequest();
+    }
+    public function getHttpRequest() {
+        return $this->httpRequest;
+    }
     public function getHeader($key) {
         $key = 'http_'. str_replace('-', '_', $key);
         return $this->server($key);

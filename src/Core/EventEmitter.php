@@ -6,6 +6,9 @@ use Lay\Core\AbstractSingleton;
 class EventEmitter extends AbstractSingleton {
     protected $listen = array();
     protected $subscribe = array();
+    public function initialize() {
+        
+    }
     public function listen($object, $event, $callback) {
         $key = $this->keyOf($object);
         $this->listen[$key][$event][] = $callback;

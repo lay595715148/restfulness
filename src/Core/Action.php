@@ -1,9 +1,11 @@
 <?php
 namespace Lay\Core;
 
+use Lay\Core\App;
 use Lay\Core\EventEmitter;
 use Lay\Http\Request;
 use Lay\Http\Response;
+use Lay\Core\Template;
 
 use Lay\Traits\Singleton;
 
@@ -89,18 +91,54 @@ abstract class Action extends AbstractAction {
     
     /**
      * 构造方法
-     *
-     * @param string $name 名称
-     * @param Template $template 模板引擎对象
+     * @return Action
      */
     protected function __construct() {
-        //$this->name = get_called_class();
+    }
+    /**
+     * App初始化
+     * @return void
+     */
+    public function initialize() {
         $this->request = Request::getInstance();
         $this->response = Response::getInstance();
-        //$this->template = new Template($this->request, $this->response);
-        //EventEmitter::on(self::E_CREATE, array($this, 'onCreate'), 1);
-        //PluginManager::exec(self::H_CREATE, array($this));
-        //EventEmitter::emit(self::E_CREATE, array($this));
+        $this->template = Template::getInstance();
+    }
+    /**
+     * Action生命同期
+     * @return void
+     */
+    public function lifecycle() {
+        $this->onCreate();
+        App::$_event->fire($this, Action::E_CREATE, array($this));
+        $method = $this->request->getMethod();
+        switch (strtoupper($method)) {
+            case 'POST':
+                $event = Action::E_POST;
+                break;
+            case 'PUT':
+                $event = Action::E_PUT;
+                break;
+            case 'DELETE':
+                $event = Action::E_DELETE;
+                break;
+            case 'PATCH':
+                $event = Action::E_PATCH;
+                break;
+            case 'HEAD':
+                $event = Action::E_HEAD;
+                break;
+            case 'OPTIONS':
+                $event = Action::E_OPTIONS;
+                break;
+            case 'GET':
+            default:
+                $event = Action::E_GET;
+                break;
+        }
+        $fnname = 'on' . ucfirst(strtolower($method));
+        $this->{$fnname}();
+        App::$_event->fire($this, $event, array($this));
     }
 
     /**
@@ -140,72 +178,36 @@ abstract class Action extends AbstractAction {
      * 创建事件触发方法
      * @see \lay\core\AbstractAction::onCreate()
      */
-    public function onCreate() {
+    protected function onCreate() {
         
-    }
-    /**
-     * REQUEST事件触发方法
-     * @see \lay\core\AbstractAction::onRequest()
-     */
-    public function onRequest() {
-        switch($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
-                // 触发action的get事件
-                EventEmitter::emit(Action::E_GET, array(
-                        $this
-                ));
-                break;
-            case 'POST':
-                // 触发action的post事件
-                EventEmitter::emit(Action::E_POST, array(
-                        $this
-                ));
-                break;
-            default:
-                break;
-        }
     }
     /**
      * GET事件触发方法
      * @see \lay\core\AbstractAction::onGet()
      */
-    public function onGet() {
+    protected function onGet() {
         
     }
     /**
      * POST事件触发方法
      * @see \lay\core\AbstractAction::onPost()
      */
-    public function onPost() {
+    protected function onPost() {
         
     }
-    public function onPut() {
+    protected function onPut() {
         
     }
-    public function onDelete() {
+    protected function onDelete() {
         
     }
-    public function onPatch() {
+    protected function onPatch() {
         
     }
-    public function onHead() {
+    protected function onHead() {
         
     }
-    public function onOptions() {
-        
-    }
-    /**
-     * 结束事件触发方法
-     * @see \lay\core\AbstractAction::onStop()
-     */
-    public function onStop() {
-        
-    }
-    /**
-     * 摧毁事件触发方法
-     * @see \lay\core\AbstractAction::onDestroy()
-     */
-    public function onDestroy() {
+    protected function onOptions() {
         
     }
 }

@@ -27,41 +27,6 @@ class Configuration extends AbstractSingleton {
     public static function getInstance() {
         return parent::getInstance();
     }
-    /**
-     * 获取某个配置节点的值
-     *
-     * @param mixed $keystr
-     *            要获取的节点键名
-     * @param string $default
-     *            默认值
-     * @return mixed
-     */
-    /*public static function get($keystr, $default = NULL){
-        $node = &self::$_config;
-        if ($keystr){
-            $keys = explode('.', $keystr);
-            foreach ($keys as $key){
-                if (isset($node[$key])){
-                    $node = &$node[$key];
-                }else{
-                    return $default;
-                }
-            }
-        }
-        return $node;
-    }*/
-    /**
-     * 设置某个配置节点的值
-     *
-     * @param mixed $keystr
-     *            要设置的节点键名
-     * @param mixed $value
-     *            要设置的节点值
-     * @return void
-     */
-    /*public static function set($name, $value){
-        self::$_config[$name] = $value;
-    }*/
 
     /**
      * 初始化配置项

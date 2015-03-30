@@ -1,15 +1,22 @@
 <?php
 namespace Lay\Http;
 
-use Lay\Traits\Singleton;
+use Lay\Core\AbstractSingleton;
 use Lay\Core\Session;
+use HttpResponse;
 
-class Response {
-    use Singleton;
+class Response extends AbstractSingleton {
+    protected $httpResponse;
     protected $code = Http::OK;
     protected $header = array();
     protected $cookie = array();
     protected $body;
+    protected function __construct() {
+        $this->httpResponse = new HttpResponse();
+    }
+    public function getHttpResponse() {
+        return $this->httpResponse;
+    }
     public function execute() {
         list($header, $body) = $this->compile();
         //Session::getInstance()->commit();
