@@ -156,11 +156,7 @@ abstract class App extends AbstractSingleton {
      * @return mixed
      */
     public static function get($keystr = '', $default = null) {
-        if(($ret = Configuration::get($keystr)) === null) {
-            return $default;
-        } else {
-            return $ret;
-        }
+        return Configuration::get($keystr, $default);
     }
 }
 

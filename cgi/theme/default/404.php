@@ -1,4 +1,4 @@
 404
 <?php
-print_r($this->dirty);
+//print_r($this->dirty);
 // PHP END

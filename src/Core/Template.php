@@ -5,6 +5,7 @@ use Lay\Http\Request;
 use Lay\Http\Response;
 use Lay\Core\AbstractSingleton;
 use Lay\Util\Utility;
+use Lay\Util\Logger;
 use Lay\Core\App;
 
 class Template extends AbstractSingleton {
@@ -121,7 +122,7 @@ class Template extends AbstractSingleton {
         $this->resource();//初始化语言包
         $this->theme(App::get('theme', 'default'));//初始化主题皮肤
 
-        App::$_event->listen($this, App::E_FINISH, array($this, 'spit'));
+        App::$_event->listen(App::$_app, App::E_FINISH, array($this, 'spit'));
     }
     /**
      * get template file path
@@ -346,9 +347,7 @@ class Template extends AbstractSingleton {
      */
     public function json() {
         // if dirty data exists
-        //ob_flush();
-        $this->dirty = ob_get_contents();
-        ob_end_clean();
+        $this->swallow();
         // if redirecting
         if($this->redirect) {
             $this->response->redirect($this->redirect);
@@ -366,20 +365,18 @@ class Template extends AbstractSingleton {
             $this->response->setData(json_encode($this->vars));
         }
         
-        if(headers_sent()) {
+        //if(headers_sent()) {
             echo $this->response->getData();
-        } else {
-            $this->response->send();
-        }
+        //} else {
+        //    $this->response->send();
+        //}
     }
     /**
      * output as xml string
      */
     public function xml() {
         // if dirty data exists
-        //ob_flush();
-        $this->dirty = ob_get_contents();
-        ob_end_clean();
+        $this->swallow();
         // if redirecting
         if($this->redirect) {
             $this->response->redirect($this->redirect);
@@ -393,6 +390,35 @@ class Template extends AbstractSingleton {
         // set varibales data
         $this->response->setData(Utility::array2XML($this->vars));
         
+        //if(headers_sent()) {
+            echo $this->response->getData();
+        //} else {
+        //    $this->response->send();
+        //}
+    }
+    /**
+     * output as template
+     *
+     * @return void
+     */
+    public function display() {
+        // if dirty data exists
+        $this->swallow();
+        // if redirecting
+        if($this->redirect) {
+            $this->response->redirect($this->redirect);
+        }
+        // header plain data
+        $this->response->setContentType('text/plain');
+        // more headers
+        foreach($this->headers as $header) {
+            $this->response->setHeader($header);
+        }
+        // get output data
+        $results = $this->output();
+        // set output data
+        $this->response->setData($results);
+        // send
         //if(headers_sent()) {
             echo $this->response->getData();
         //} else {
@@ -427,45 +453,43 @@ class Template extends AbstractSingleton {
         }
         return $results;
     }
+
     /**
-     * output as template
+     * swallow output
      *
      * @return void
      */
-    public function display() {
+    public function swallow() {
+        //ob_start();
         // if dirty data exists
         //ob_flush();
-        $this->dirty = ob_get_contents();
+        if(empty($this->dirty)) {
+            $this->dirty = ob_get_contents();
+        } else if(is_array($this->dirty)) {
+            $this->dirty[] = ob_get_contents();
+        } else {
+            $_dirty = $this->dirty;
+            $this->dirty = array();
+            $this->dirty[] = $_dirty;
+            $this->dirty[] = ob_get_contents();
+        }
         ob_end_clean();
-        // if redirecting
-        if($this->redirect) {
-            $this->response->redirect($this->redirect);
-        }
-        // header plain data
-        $this->response->setContentType('text/plain');
-        // more headers
-        foreach($this->headers as $header) {
-            $this->response->setHeader($header);
-        }
-        // get output data
-        $results = $this->output();
-        // set output data
-        $this->response->setData($results);
-        // send
-        //if(headers_sent()) {
-            echo $this->response->getData();
-        //} else {
-        //    $this->response->send();
-        //}
     }
-
+    /**
+     * spit output
+     *
+     * @return void
+     */
     public function spit() {
-        if($this->dirty) {
-            print_r($this->dirty);
+        ob_start();
+        if(!empty($this->dirty) && is_array($this->dirty)) {
+            echo json_encode($this->dirty);
+            Logger::debug($this->dirty);
+        } else if(!empty($this->dirty)) {
+            echo $this->dirty;
+            Logger::debug($this->dirty);
         }
-        print_r($this->dirty);
-        //ob_flush();
-        //flush();
+        ob_flush();
     }
 }
 
