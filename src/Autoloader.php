@@ -1,7 +1,7 @@
 <?php
 namespace Lay;
 
-use Lay\Util\Util;
+use Lay\Util\Utility;
 
 class Autoloader {
     private static $_classpath = __DIR__;
@@ -205,7 +205,7 @@ class Autoloader {
                 self::$_caches = array_merge($caches, self::$_caches);
             }
             // 写入
-            $content = Util::array2PHPContent(self::$_caches);
+            $content = Utility::array2PHPContent(self::$_caches);
             $handle = fopen($cachename, 'w');
             $result = fwrite($handle, $content);
             $return = fflush($handle);

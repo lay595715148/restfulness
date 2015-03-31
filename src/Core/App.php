@@ -5,8 +5,9 @@ namespace Lay\Core;
 use Lay\Core\Configuration;
 use Lay\Core\EventEmitter;
 use Lay\Core\Action;
-use Lay\Util\Util;
+use Lay\Util\Utility;
 use Lay\Util\RESTful;
+use Lay\Util\Logger;
 //use Lay\Autoloader;
 //第3方类
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -24,23 +25,18 @@ use Lay\Http\Request;
 use Lay\Cgi\Index as CgiIndex;
 use Lay\Cli\Index as CliIndex;
 
-class App extends AbstractSingleton {
+abstract class App extends AbstractSingleton {
     const E_BEFORE = 'app:event:before';
     const E_RUN = 'app:event:run';
     const E_AFTER = 'app:event:after';
     const E_FINISH = 'app:event:finish';
 	public static $_rootpath;
     public static $_docpath;
+    public static $_logger;
     public static $_action;
     public static $_config;
     public static $_event;
     public static $_app;
-    /**
-     * @return core\App
-     */
-    public static function getInstance() {
-    	return parent::getInstance();
-    }
     /**
      * 运行，创建App并启动App的生命同期
      * @return void
@@ -53,7 +49,10 @@ class App extends AbstractSingleton {
         // initialize root path
 		self::$_rootpath = dirname(dirname(__DIR__));
         // initialize document path
-        self::$_rootpath = $_SERVER['DOCUMENT_ROOT'];
+        self::$_docpath = $_SERVER['DOCUMENT_ROOT'];
+        // initialize Logger
+        self::$_logger = Logger::getInstance();
+        self::$_logger->initialize();
         // initialize EventEmitter
         self::$_event = EventEmitter::getInstance();
         self::$_event->initialize();
@@ -69,7 +68,8 @@ class App extends AbstractSingleton {
 	 *
 	 * @see https://github.com/chriso/klein.php
 	 */
-	private $klein;
+	protected $klein;
+    protected $routers = array();
     /**
      * App初始化
      * @return void
@@ -83,16 +83,16 @@ class App extends AbstractSingleton {
     public function lifecycle() {
         // before
         $this->brfore();
-        App::$_event->fire($this, App::E_BEFORE, array($this));
+        self::$_event->fire($this, self::E_BEFORE, array($this));
         // run
         $this->run();
-        App::$_event->fire($this, App::E_RUN, array($this));
+        self::$_event->fire($this, self::E_RUN, array($this));
         // after
         $this->after();
-        App::$_event->fire($this, App::E_AFTER, array($this));
+        self::$_event->fire($this, self::E_AFTER, array($this));
         // finish
         $this->finish();
-        App::$_event->fire($this, App::E_FINISH, array($this));
+        self::$_event->fire($this, self::E_FINISH, array($this));
     }
 	protected function brfore() {
 	}
@@ -111,9 +111,8 @@ class App extends AbstractSingleton {
             }
         } else {
             $this->klein = $klein = new Klein();
-            $routers = self::get('routers', array());
             
-            foreach ($routers as $k => $config) {
+            foreach ($this->routers as $k => $config) {
                 $klein->respond($k, function($req, $res) use ($klein, $config, $request) {
                     $classname = $config['class'];
                     if(class_exists($classname) && self::$_action = $classname::getInstance()) {

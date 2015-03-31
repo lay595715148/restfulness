@@ -54,8 +54,6 @@ class Logger extends AbstractSingleton {
      * 构造方法
      */
     protected function __construct() {
-        $this->directory(App::$_docpath);//初始化日志文档目录
-        $this->initialize(App::get('logger', true));
     }
     /**
      * set log dir
@@ -67,13 +65,10 @@ class Logger extends AbstractSingleton {
         }
     }
     /**
-     * log级别，包括打印输出和syslog日志
-     *
-     * @param mixed $debug
-     *            级别，如：true; false; array(true); array(Logger::L_NONE)
-     * @return void
+     * set log dir
+     * @param string $dir
      */
-    public function initialize($level = true) {
+    public function level($level) {
         if(is_bool($level)) {
             $this->level = $level;
         } else if(is_array($level)) {
@@ -82,8 +77,19 @@ class Logger extends AbstractSingleton {
         } else if(is_int($level)) {
             $this->level = $level;
         } else {
-        	$this->level = true;
+            $this->level = true;
         }
+    }
+    /**
+     * log级别，包括打印输出和syslog日志
+     *
+     * @param mixed $debug
+     *            级别，如：true; false; array(true); array(Logger::L_NONE)
+     * @return void
+     */
+    public function initialize() {
+        $this->directory(App::$_docpath);//初始化日志文档目录
+        $this->level(App::get('logger', true));
     }
     /**
      * 当前级别数值与给出的级别数值是否匹配

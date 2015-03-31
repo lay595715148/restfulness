@@ -7,7 +7,7 @@
 namespace Lay\Core;
 
 use Lay\Core\AbstractSingleton;
-use Lay\Util\Util;
+use Lay\Util\Utility;
 
 /**
  * 配置数据访问类
@@ -33,15 +33,15 @@ class Configuration extends AbstractSingleton {
      * @return void
      */
     public static function initialize() {
-        $rootpath = App::$_rootpath;
+        $path = App::$_rootpath;
         // 加载配置缓存
         $config = self::loadCache();
         // 没有缓存，加载配置
         if(empty($config)) {
-            $envfile = $rootpath . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'env.php';
+            $envfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'env.php';
             self::configure($envfile);
-            $env = self::get('env');
-            $configfile = $rootpath . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'main.' . $env . '.php';
+            $env = self::get('env', 'test');
+            $configfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'main.' . $env . '.php';
             self::configure($configfile);
         }
         // 注册shutdown事件
@@ -122,7 +122,7 @@ class Configuration extends AbstractSingleton {
             //$caches = include realpath($cachename);
             //self::$_caches = array_merge(self::$_config, self::$_caches);
             // 写入
-            $content = Util::array2PHPContent(self::$_caches);
+            $content = Utility::array2PHPContent(self::$_caches);
             $handle = fopen($cachename, 'w');
             $result = fwrite($handle, $content);
             $return = fflush($handle);

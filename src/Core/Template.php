@@ -4,7 +4,7 @@ namespace Lay\Core;
 use Lay\Http\Request;
 use Lay\Http\Response;
 use Lay\Core\AbstractSingleton;
-use Lay\Util\Util;
+use Lay\Util\Utility;
 use Lay\Core\App;
 
 class Template extends AbstractSingleton {
@@ -390,7 +390,7 @@ class Template extends AbstractSingleton {
             $this->response->setHeader($header);
         }
         // set varibales data
-        $this->response->setData(Util::array2XML($this->vars));
+        $this->response->setData(Utility::array2XML($this->vars));
         
         //if(headers_sent()) {
             echo $this->response->getData();
