@@ -4,6 +4,7 @@ namespace Lay\Cgi;
 use Lay\Core\Action;
 use Lay\Util\RESTful;
 use Lay\Util\Util;
+use Lay\Util\Logger;
 
 use __;
 use Respect\Validation\Validator as v;
@@ -28,7 +29,7 @@ class Ass extends Action {
 			//$cli = CliIndex::getInstance();
 			$res = $rest->send('http','cgi.restfulness.laysoft.cn', '/a', 'json', 'PUT', array('post' => 1), array('ascii' => 'E:/lli/ascii.art.txt'));//
 			headers_sent() || header("Content-type: text/html; charset=utf-8");
-			echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
+			echo '<pre>';print_r(json_encode(array($string, $res['body'])));echo '</pre>';
 			$this->template->file('404.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';
 			$this->template->display();

@@ -2,6 +2,9 @@
 namespace Lay\Core;
 
 use Lay\Core\AbstractSingleton;
+use Lay\Core\App;
+
+use Lay\Util\Logger;
 
 class EventEmitter extends AbstractSingleton {
     protected $listen = array();

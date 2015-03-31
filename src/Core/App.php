@@ -30,6 +30,7 @@ class App extends AbstractSingleton {
     const E_AFTER = 'app:event:after';
     const E_FINISH = 'app:event:finish';
 	public static $_rootpath;
+    public static $_docpath;
     public static $_action;
     public static $_config;
     public static $_event;
@@ -51,6 +52,8 @@ class App extends AbstractSingleton {
         ini_set('implicit_flush', 'off');
         // initialize root path
 		self::$_rootpath = dirname(dirname(__DIR__));
+        // initialize document path
+        self::$_rootpath = $_SERVER['DOCUMENT_ROOT'];
         // initialize EventEmitter
         self::$_event = EventEmitter::getInstance();
         self::$_event->initialize();

@@ -5,6 +5,7 @@ use Lay\Http\Request;
 use Lay\Http\Response;
 use Lay\Core\AbstractSingleton;
 use Lay\Util\Util;
+use Lay\Core\App;
 
 class Template extends AbstractSingleton {
     /**
@@ -112,12 +113,14 @@ class Template extends AbstractSingleton {
     /**
      * 构造方法
      */
-    public function __construct() {
+    protected function __construct() {
         $this->request = Request::getInstance()->getHttpRequest();
         $this->response = Response::getInstance()->getHttpResponse();
         $this->language();//初始化语言
-        $this->directory($_SERVER['DOCUMENT_ROOT']);//初始化模板文档目录
+        $this->directory(App::$_docpath);//初始化模板文档目录
         $this->theme(App::get('theme', 'default'));//初始化主题皮肤
+
+        App::$_event->listen($this, App::E_FINISH, array($this, 'spit'));
     }
     /**
      * get template file path
@@ -389,11 +392,11 @@ class Template extends AbstractSingleton {
         // set varibales data
         $this->response->setData(Util::array2XML($this->vars));
         
-        if(headers_sent()) {
+        //if(headers_sent()) {
             echo $this->response->getData();
-        } else {
-            $this->response->send();
-        }
+        //} else {
+        //    $this->response->send();
+        //}
     }
     /**
      * get output data
@@ -448,11 +451,20 @@ class Template extends AbstractSingleton {
         // set output data
         $this->response->setData($results);
         // send
-        if(headers_sent()) {
+        //if(headers_sent()) {
             echo $this->response->getData();
-        } else {
-            $this->response->send();
+        //} else {
+        //    $this->response->send();
+        //}
+    }
+
+    public function spit() {
+        if($this->dirty) {
+            print_r($this->dirty);
         }
+        print_r($this->dirty);
+        //ob_flush();
+        //flush();
     }
 }
 
