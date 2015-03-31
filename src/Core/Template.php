@@ -116,8 +116,9 @@ class Template extends AbstractSingleton {
     protected function __construct() {
         $this->request = Request::getInstance()->getHttpRequest();
         $this->response = Response::getInstance()->getHttpResponse();
+        $this->directory(App::$_docpath);//初始化文档目录
         $this->language();//初始化语言
-        $this->directory(App::$_docpath);//初始化模板文档目录
+        $this->resource();//初始化语言包
         $this->theme(App::get('theme', 'default'));//初始化主题皮肤
 
         App::$_event->listen($this, App::E_FINISH, array($this, 'spit'));
@@ -409,17 +410,17 @@ class Template extends AbstractSingleton {
             $results = $this->plain;
         } else {
             ob_start();
-            $lan = &$this->lan;
-            $vars = &$this->vars;
-            $file = &$this->file;
-            $metas = &$this->metas;
-            $jses = &$this->jses;
-            $javascript = &$this->javascript;
-            $csses = &$this->csses;
-            $headers = &$this->headers;
-            $res = &$this->res;
-            extract($vars);
-            include ($file);
+            $l = &$this->lan;
+            $v = &$this->vars;
+            $a = &$this->attachments;
+            $m = &$this->metas;
+            $j = &$this->jses;
+            $s = &$this->javascript;
+            $c = &$this->csses;
+            $h = &$this->headers;
+            $r = &$this->resources;
+            extract($v);
+            include ($this->file);
             //ob_flush();
             $results = $this->plain = ob_get_contents();
             ob_end_clean();
