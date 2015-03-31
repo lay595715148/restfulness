@@ -3,9 +3,9 @@ namespace Lay\Web;
 
 use Lay\Core\Action;
 
-class User extends Action {
+class Index extends Action {
 	public function onGet() {
-		$this->template->file('user.php');
+		$this->template->file('404.php');
 		$this->template->display();
 	}
 	public function onPost() {

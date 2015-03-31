@@ -3,7 +3,7 @@ namespace Lay\Cgi;
 
 use Lay\Core\Action;
 use Lay\Util\RESTful;
-use Lay\Util\Util;
+use Lay\Util\Utility;
 use Lay\Util\Logger;
 
 use __;

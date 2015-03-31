@@ -1,12 +1,11 @@
 <?php
+$env = Lay\Core\Configuration::get('env', 'test');
+
 return array(
-	'routers' => array(
-		'/ass.[src|xml|json:format]?' => array(
-			'class' => '\Lay\Cgi\Ass'
-		),
-		'/a.[src|xml|json:format]?' => array(
-			'class' => '\Lay\Cgi\A'
-		)
+	'app' => array(
+		'cgi' => include __DIR__ . DIRECTORY_SEPARATOR . 'cgi' . DIRECTORY_SEPARATOR . "cgi.$env.php",
+		'cli' => include __DIR__ . DIRECTORY_SEPARATOR . 'cli' . DIRECTORY_SEPARATOR . "cli.$env.php",
+		'web' => include __DIR__ . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . "web.$env.php"
 	)
 );
 // PHP END
