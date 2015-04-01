@@ -3,6 +3,8 @@ namespace Lay;
 
 use Lay\Util\Utility;
 
+use Exception;
+
 class Autoloader {
     private static $_classpath = __DIR__;
     private static $_classes = array();
@@ -18,8 +20,6 @@ class Autoloader {
         self::addpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
         // 使用自定义的autoload方法
         spl_autoload_register(array('Lay\Autoloader', 'autoload'));
-        // 注册异常句柄
-        //set_error_handler(array('Lay\Autoloader', 'handler'));
         // 加载类文件路径缓存
         self::loadCache();
         // 注册shutdown事件
@@ -37,7 +37,7 @@ class Autoloader {
      * @param string $filepath
      * @return void
      */
-    public static function custom($classname, $filepath, $force = false) {
+    public static function customize($classname, $filepath, $force = false) {
         $classes = &self::$_classes;
         if(is_file($filepath) && (! array_key_exists($classname, $classes) || $force)) {
             self::setCache($classname, realpath($filepath));
@@ -255,7 +255,7 @@ class Autoloader {
         $count = count($funs);
         foreach($funs as $i => $fun) {
             if($fun[0] == 'Lay\Autoloader' && $fun[1] == 'autoload' && $count == $i + 1) {
-                throw new \Exception($classname.' not found by autoload function');
+                throw new Exception($classname.' not found by autoload function');
             }
         }
     }
@@ -268,19 +268,6 @@ class Autoloader {
      */
     public static function exists($classname, $autoload = true) {
         return class_exists($classname, $autoload) || interface_exists($classname, $autoload) || trait_exists($classname, $autoload);
-    }
-
-    /**
-     * 
-     * @param int $errno 
-     * @param string $errstr 
-     * @param string $errfile 
-     * @param int $errline 
-     * @param mixed $errcontext 
-     * @return void
-     */
-    public static function handler($errno, $errstr, $errfile, $errline, $errcontext) {
-        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 }
 

@@ -28,11 +28,12 @@ class Ass extends Action {
 			//$cgi = CgiIndex::getInstance();
 			//$cli = CliIndex::getInstance();
 			$res = $rest->send('http','cgi.restfulness.laysoft.cn', '/a', 'json', 'PUT', array('post' => 1), array('ascii' => 'E:/lli/ascii.art.txt'));//
-			headers_sent() || header("Content-type: text/html; charset=utf-8");
-			echo '<pre>';print_r(json_encode(array($string, $res['body'])));echo '</pre>';
-			$this->template->file('404.php');
+			//headers_sent() || header("Content-type: text/html; charset=utf-8");
+			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
+			$this->template->push(array('pinyin' => $string, 'body' => $res['body']));
+			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';
-			$this->template->display();
+			//$this->template->display();
 		}
 		//break;
 	}

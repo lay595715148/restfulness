@@ -8,6 +8,8 @@ use Lay\Util\Utility;
 use Lay\Util\Logger;
 use Lay\Core\App;
 
+use Exception;
+
 class Template extends AbstractSingleton {
     /**
      * HttpRequest对象
@@ -350,26 +352,28 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            $this->response->redirect($this->redirect);
-        }
-        // header json data
-        $this->response->setContentType('application/json');
-        // more headers
-        foreach($this->headers as $header) {
-            $this->response->setHeader($header);
-        }
-        // set varibales data
-        if(version_compare(phpversion(), '5.4.0') > 0) {
-            $this->response->setData(json_encode($this->vars, JSON_PRETTY_PRINT));
+            //$this->response->redirect($this->redirect);
+            header("Location: {$this->redirect}");
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
         } else {
-            $this->response->setData(json_encode($this->vars));
+            // header plain data
+            header('ContentType: application/json');
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+            // set varibales data
+            if(version_compare(phpversion(), '5.4.0') > 0) {
+                $results = json_encode($this->vars, JSON_PRETTY_PRINT);
+            } else {
+                $results = json_encode($this->vars);
+            }
+            // send
+            echo $results;
         }
-        
-        //if(headers_sent()) {
-            echo $this->response->getData();
-        //} else {
-        //    $this->response->send();
-        //}
     }
     /**
      * output as xml string
@@ -379,22 +383,30 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            $this->response->redirect($this->redirect);
+            //$this->response->redirect($this->redirect);
+            header("Location: {$this->redirect}");
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+        } else {
+            // header plain data
+            header('ContentType: text/xml');
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+            // set varibales data
+            $results = Utility::array2XML($this->vars);
+            // send
+            echo $results;
         }
-        // header xml data
-        $this->response->setContentType('text/xml');
-        // more headers
-        foreach($this->headers as $header) {
-            $this->response->setHeader($header);
-        }
-        // set varibales data
-        $this->response->setData(Utility::array2XML($this->vars));
-        
-        //if(headers_sent()) {
-            echo $this->response->getData();
-        //} else {
-        //    $this->response->send();
-        //}
+    }
+    /**
+     * output as csv string
+     */
+    public function csv() {
+
     }
     /**
      * output as template
@@ -406,24 +418,26 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            $this->response->redirect($this->redirect);
+            //$this->response->redirect($this->redirect);
+            header("Location: {$this->redirect}");
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+        } else if($this->file) {
+            // header plain data
+            header('ContentType: text/plain');
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+            // get output data
+            $results = $this->output();
+            // send
+            echo $results;
+        } else {
+            $this->json();
         }
-        // header plain data
-        $this->response->setContentType('text/plain');
-        // more headers
-        foreach($this->headers as $header) {
-            $this->response->setHeader($header);
-        }
-        // get output data
-        $results = $this->output();
-        // set output data
-        $this->response->setData($results);
-        // send
-        //if(headers_sent()) {
-            echo $this->response->getData();
-        //} else {
-        //    $this->response->send();
-        //}
     }
     /**
      * get output data
@@ -434,7 +448,7 @@ class Template extends AbstractSingleton {
         // if plain data exists
         if($this->plain) {
             $results = $this->plain;
-        } else {
+        } else if($this->file) {
             ob_start();
             $l = &$this->lan;
             $v = &$this->vars;
@@ -450,6 +464,8 @@ class Template extends AbstractSingleton {
             //ob_flush();
             $results = $this->plain = ob_get_contents();
             ob_end_clean();
+        } else {
+            throw new Exception('not template file');
         }
         return $results;
     }
@@ -463,15 +479,18 @@ class Template extends AbstractSingleton {
         //ob_start();
         // if dirty data exists
         //ob_flush();
-        if(empty($this->dirty)) {
-            $this->dirty = ob_get_contents();
-        } else if(is_array($this->dirty)) {
-            $this->dirty[] = ob_get_contents();
-        } else {
-            $_dirty = $this->dirty;
-            $this->dirty = array();
-            $this->dirty[] = $_dirty;
-            $this->dirty[] = ob_get_contents();
+        $cache = ob_get_contents();
+        if(!empty($cache)) {
+            if(empty($this->dirty)) {
+                $this->dirty = $cache;
+            } else if(is_array($this->dirty)) {
+                $this->dirty[] = $cache;
+            } else {
+                $dirty = $this->dirty;
+                $this->dirty = array();
+                $this->dirty[] = $dirty;
+                $this->dirty[] = $cache;
+            }
         }
         ob_end_clean();
     }
@@ -481,15 +500,13 @@ class Template extends AbstractSingleton {
      * @return void
      */
     public function spit() {
-        ob_start();
+        //ob_start();
         if(!empty($this->dirty) && is_array($this->dirty)) {
             echo json_encode($this->dirty);
-            Logger::debug($this->dirty);
         } else if(!empty($this->dirty)) {
             echo $this->dirty;
-            Logger::debug($this->dirty);
         }
-        ob_flush();
+        //ob_flush();
     }
 }
 

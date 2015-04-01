@@ -25,6 +25,9 @@ use Lay\Http\Request;
 use Lay\Cgi\Index as CgiIndex;
 use Lay\Cli\Index as CliIndex;
 
+use Exception;
+use ErrorException;
+
 abstract class App extends AbstractSingleton {
     const E_BEFORE = 'app:event:before';
     const E_RUN = 'app:event:run';
@@ -44,25 +47,35 @@ abstract class App extends AbstractSingleton {
 	public static function start() {
         //ob start
         ob_start();
+        error_reporting(E_ALL);
         ini_set('output_buffering', 'on');
         ini_set('implicit_flush', 'off');
-        // initialize root path
-		self::$_rootpath = dirname(dirname(__DIR__));
-        // initialize document path
-        self::$_docpath = $_SERVER['DOCUMENT_ROOT'];
-        // initialize Logger
-        self::$_logger = Logger::getInstance();
-        self::$_logger->initialize();
-        // initialize EventEmitter
-        self::$_event = EventEmitter::getInstance();
-        self::$_event->initialize();
-        // initialize Configuration
-        self::$_config = Configuration::getInstance();
-        self::$_config->initialize();
-        // initialize App
-        self::$_app = self::getInstance();
-        self::$_app->initialize();
-        self::$_app->lifecycle();
+        try {
+            // initialize root path
+            self::$_rootpath = dirname(dirname(__DIR__));
+            // initialize document path
+            self::$_docpath = $_SERVER['DOCUMENT_ROOT'];
+            // initialize Logger
+            self::$_logger = Logger::getInstance();
+            self::$_logger->initialize();
+            // initialize EventEmitter
+            self::$_event = EventEmitter::getInstance();
+            self::$_event->initialize();
+            // initialize Configuration
+            self::$_config = Configuration::getInstance();
+            self::$_config->initialize();
+            // initialize App
+            self::$_app = self::getInstance();
+            self::$_app->initialize();
+            self::$_app->lifecycle();
+        } catch (Exception $err) {
+            $log = '[' . date('Y-m-d H:i:s') . "]==============================================================>\n";
+            $log .= $err->getMessage() . '(' . $err->getCode() . ")\n";
+            $log .= $err->getFile() . '(' . $err->getLine() . ")\n";
+            $log .= $err->getTraceAsString() . "\n";
+            $log .= "<===================================================================================\n";
+            Logger::error($log);
+        }
 	}
 	/**
 	 *

@@ -9,6 +9,8 @@ use Lay\Core\Template;
 
 use Lay\Traits\Singleton;
 
+use Lay\Util\Logger;
+
 abstract class Action extends AbstractAction {
 	use Singleton;
 	//use Lay\Traits\Action;
@@ -18,6 +20,12 @@ abstract class Action extends AbstractAction {
      * @var string
      */
     const E_CREATE = 'action:event:create';
+    /**
+     * 事件常量，STATE
+     *
+     * @var string
+     */
+    const E_STATE = 'action:event:state';
     /**
      * 事件常量，GET时
      *
@@ -61,11 +69,11 @@ abstract class Action extends AbstractAction {
      */
     const E_OPTIONS = 'action:event:options';
     /**
-     * 事件常量，结束时
+     * 事件常量，渲染时
      *
      * @var string
      */
-    const E_STOP = 'action:event:stop';
+    const E_RENDER = 'action:event:render';
     
 
     /**
@@ -109,9 +117,23 @@ abstract class Action extends AbstractAction {
      * @return void
      */
     public function lifecycle() {
+        // on create
         $this->onCreate();
         App::$_event->fire($this, Action::E_CREATE, array($this));
         $method = $this->request->getMethod();
+        // on 
+        $this->{'on' . ucfirst(strtolower($method))}();
+        App::$_event->fire($this, Action::E_STATE, array($this));
+        App::$_event->fire($this, $this->method2Event($method), array($this));
+        // render
+        $this->onRender();
+        App::$_event->fire($this, Action::E_RENDER, array($this));
+    }
+    /**
+     * convert http method to Action event
+     * @return void
+     */
+    private function method2Event($method) {
         switch (strtoupper($method)) {
             case 'POST':
                 $event = Action::E_POST;
@@ -136,9 +158,7 @@ abstract class Action extends AbstractAction {
                 $event = Action::E_GET;
                 break;
         }
-        $fnname = 'on' . ucfirst(strtolower($method));
-        $this->{$fnname}();
-        App::$_event->fire($this, $event, array($this));
+        return $event;
     }
 
     /**
@@ -209,5 +229,19 @@ abstract class Action extends AbstractAction {
     }
     protected function onOptions() {
         
+    }
+    protected function onRender() {
+        $rep = $this->request->getExtension();
+        switch ($rep) {
+            case 'json':
+                $this->template->json();
+                break;
+            case 'xml':
+                $this->template->xml();
+                break;
+            default:
+                $this->template->display();
+                break;
+        }
     }
 }

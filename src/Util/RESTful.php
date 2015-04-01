@@ -15,25 +15,8 @@ class RESTful {
         'html'          => 'text/html',
         'csv'           => 'application/csv'
     );
-    /**
-     * 
-     */
-    /*public static function get($resource, $data = array(), $sid = '', $headers = array()) {
-
-    }
-    public static function post($resource, $data = array(), $sid = '', $headers = array()) {
-
-    }
-    public static function put($resource, $data = array(), $sid = '', $headers = array()) {
-
-    }
-    public static function delete($resource, $data = array(), $sid = '', $headers = array()) {
-
-    }
-    public static function jsonCall($resource, $state, $params = array()) {
-
-    }*/
     public static $method_emulate = true;
+
     protected $handler;
     protected $options = array();
     public function __construct() {
@@ -153,13 +136,13 @@ class RESTful {
         return isset($_COOKIE[$key]) ? $_COOKIE[$key] : null;
     }
     public static function put($key = null) {
-        static $_PUT = null;
+        global $_PUT;
         if ($_PUT === null) {
             if (self::req()->isPUT()) {
-                if (strtoupper(server('request_method')) == 'PUT') {
+                if (strtoupper(self::server('request_method')) == 'PUT') {
                     parse_str(file_get_contents('php://input'), $_PUT);
                 } else {
-                    $_PUT =& $_POST;
+                    $_PUT = &$_POST;
                 }
             } else {
                 $_PUT = array();

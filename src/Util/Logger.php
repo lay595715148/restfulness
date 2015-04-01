@@ -116,7 +116,7 @@ class Logger extends AbstractSingleton {
 	    	$lv = strtolower($this->parseLevel($level));
 	        $file = $this->dir . DIRECTORY_SEPARATOR .  'log' . DIRECTORY_SEPARATOR . "$name.$lv.log";
 	        $var = is_string($var) ? $var : var_export($var, true);
-	        error_log(rtrim($var, $line_delimiter) . $line_delimiter, 3, $file);
+	        error_log('[' . date('Y-m-d H:i:s') . ']' . rtrim($var, $line_delimiter) . $line_delimiter, 3, $file);
     	}
     }
 
