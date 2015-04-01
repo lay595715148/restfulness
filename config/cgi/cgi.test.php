@@ -1,10 +1,10 @@
 <?php
 return array(
 	'routers' => array(
-		'/ass.[src|xml|json:format]?' => array(
+		'/ass.[src|xml|json|csv:format]?' => array(
 			'class' => '\Lay\Cgi\Ass'
 		),
-		'/a.[src|xml|json:format]?' => array(
+		'/a.[src|xml|json|csv:format]?' => array(
 			'class' => '\Lay\Cgi\A'
 		)
 	)

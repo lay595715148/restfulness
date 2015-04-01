@@ -10,6 +10,7 @@ use Lay\Core\Template;
 use Lay\Traits\Singleton;
 
 use Lay\Util\Logger;
+use Lay\Autoloader;
 
 abstract class Action extends AbstractAction {
 	use Singleton;
@@ -238,6 +239,10 @@ abstract class Action extends AbstractAction {
                 break;
             case 'xml':
                 $this->template->xml();
+                break;
+            case 'src':
+                $pathname = Autoloader::getClass(get_class($this));
+                highlight_file($pathname);
                 break;
             default:
                 $this->template->display();

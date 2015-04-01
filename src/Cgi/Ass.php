@@ -16,11 +16,11 @@ class Ass extends Action {
 		headers_sent() || header("Content-type: text/html; charset=utf-8");
 	}
 	public function onGet() {
-		if($this->request->getExtension() == 'src') {
+		/*if($this->request->getExtension() == 'src') {
 			highlight_string(file_get_contents(__FILE__));
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";
 			__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
-		} else {
+		} else {*/
 			$string = Pinyin::parse('第二个参数随意设置', array('accent' => false));
 			//print_r($string);
 			//$u = new User();
@@ -31,10 +31,11 @@ class Ass extends Action {
 			//headers_sent() || header("Content-type: text/html; charset=utf-8");
 			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
 			$this->template->push(array('pinyin' => $string, 'body' => $res['body']));
+			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';
 			//$this->template->display();
-		}
+		//}
 		//break;
 	}
 	public function onPost() {

@@ -167,10 +167,12 @@ class Template extends AbstractSingleton {
             } else */
             if(is_object($value)) {
                 $this->vars[$name] = get_object_vars($value);
+            } else if(!is_null($value)) {
+                $this->vars[$name] = $value;
             } else {
-                $this->vars[$name] = is_null($value) ? '' : $value;
+                $this->vars[] = $name;
             }
-        } else if(is_array($name)) {
+        } else if(is_array($name) && is_null($value)) {
             foreach($name as $n => $val) {
                 $this->push($n, $val);
             }
@@ -352,15 +354,16 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            //$this->response->redirect($this->redirect);
+            header('X-Powered-By: restfulness');
             header("Location: {$this->redirect}");
             // more headers
             foreach($this->headers as $header) {
                 header($header);
             }
         } else {
-            // header plain data
-            header('ContentType: application/json');
+            // header json data
+            header('X-Powered-By: restfulness');
+            header('Content-Type: application/json');
             // more headers
             foreach($this->headers as $header) {
                 header($header);
@@ -383,15 +386,16 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            //$this->response->redirect($this->redirect);
+            header('X-Powered-By: restfulness');
             header("Location: {$this->redirect}");
             // more headers
             foreach($this->headers as $header) {
                 header($header);
             }
         } else {
-            // header plain data
-            header('ContentType: text/xml');
+            // header xml data
+            header('X-Powered-By: restfulness');
+            header('Content-Type: text/xml');
             // more headers
             foreach($this->headers as $header) {
                 header($header);
@@ -406,7 +410,29 @@ class Template extends AbstractSingleton {
      * output as csv string
      */
     public function csv() {
-
+        // if dirty data exists
+        $this->swallow();
+        // if redirecting
+        if($this->redirect) {
+            header('X-Powered-By: restfulness');
+            header("Location: {$this->redirect}");
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+        } else {
+            // header xml data
+            header('X-Powered-By: restfulness');
+            header('Content-Type: application/csv');
+            // more headers
+            foreach($this->headers as $header) {
+                header($header);
+            }
+            // set varibales data
+            $results = Utility::array2CSV($this->vars);
+            // send
+            echo $results;
+        }
     }
     /**
      * output as template
@@ -418,15 +444,16 @@ class Template extends AbstractSingleton {
         $this->swallow();
         // if redirecting
         if($this->redirect) {
-            //$this->response->redirect($this->redirect);
+            header('X-Powered-By: restfulness');
             header("Location: {$this->redirect}");
             // more headers
             foreach($this->headers as $header) {
                 header($header);
             }
         } else if($this->file) {
-            // header plain data
-            header('ContentType: text/plain');
+            // header html data
+            header('X-Powered-By: restfulness');
+            header('Content-Type: text/html; charset=utf-8');
             // more headers
             foreach($this->headers as $header) {
                 header($header);

@@ -277,6 +277,7 @@ class Utility {
             return false;
         }
         $nkey = preg_match('/^[A-Za-z_][A-Za-z0-9\-_]{0,}$/', $nkey) ? $nkey : '';
+        Logger::debug(self::x2str($value, $root, $nkey));
         return simplexml_load_string('<?xml version="1.0" encoding="' . $encoding . '"?>' . self::x2str($value, $root, $nkey))->asXml();
     }
     /**
@@ -303,6 +304,27 @@ class Utility {
             $xml_str .= self::x2str($v, $k, $nkey);
         }
         return "<$key>$xml_str</$key>";
+    }
+    /**
+     * php array to csv format string
+     *
+     * @param array $input convert array
+     * @param string $delimiter
+     * @return string
+     */
+    public static function array2CSV($input = array(), $delimiter = ',') {
+        /** open raw memory as file, no need for temp files, be careful not to run out of memory thought */
+        $handler = fopen('php://temp', 'w');
+        /** loop through array  */
+        foreach ($input as $line) {
+            /** default php csv handler **/
+            fputcsv($handler, (array)$line, $delimiter);
+        }
+        /** rewrind the "file" with the csv lines **/
+        fseek($handler, 0);
+        $output = stream_get_contents($handler);
+        fclose($handler);
+        return $output;
     }
     /**
      * 递归创建文件夹目录

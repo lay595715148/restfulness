@@ -244,6 +244,20 @@ class Autoloader {
         }
     }
     /**
+     * 获取某个类路径或所有
+     *
+     * @param string $classname
+     *            类名
+     * @return mixed
+     */
+    public static function getClass($classname = '') {
+        if(is_string($classname) && $classname && isset(self::$_classes[$classname])) {
+            return self::$_classes[$classname];
+        } else {
+            return self::$_classes;
+        }
+    }
+    /**
      * 判断是否还有其他自动加载函数，如没有则抛出异常
      *
      * @return void
