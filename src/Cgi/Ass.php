@@ -21,31 +21,25 @@ class Ass extends Action {
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";
 			__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
 		} else {*/
-			__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
-			$string = Pinyin::parse('第二个参数随意设置', array('accent' => false));
+			//__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
+			$pinyin = Pinyin::parse('第二个参数随意设置', array('accent' => false));
 			//print_r($string);
 			//$u = new User();
-			$rest = new RESTful();
+			$rest = RESTful::getInstance();
+			$parse = parse_url('http://cgi.restfulness.laysoft.cn/ass.json?json=012');
+	        $pathinfo = pathinfo($parse['path']);
+	        $ext = empty($pathinfo['extension']) ? '' : $pathinfo['extension'];
 			//$cgi = CgiIndex::getInstance();
 			//$cli = CliIndex::getInstance();
-			$res = $rest->send('http','cgi.restfulness.laysoft.cn', '/a', 'json', 'PUT', array('post' => 1), array('ascii' => 'E:/lli/ascii.art.txt'));//
+			$res = $rest->send('http','cgi.restfulness.laysoft.cn', '/a', 'json', 'POST', array('post' => 1), array('ascii' => 'E:/lli/ascii.art.txt'));//
 			//headers_sent() || header("Content-type: text/html; charset=utf-8");
 			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
-			$this->template->push(array('pinyin' => $string, 'body' => $res['body']));
+			$this->template->push(array('parse' => $ext, 'pinyin' => $pinyin, 'body' => $res['body']));
 			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';
 			//$this->template->display();
 		//}
 		//break;
-	}
-	public function onPost() {
-		
-	}
-	public function onPut() {
-		
-	}
-	public function onDelete() {
-		
 	}
 }

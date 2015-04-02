@@ -3,9 +3,13 @@ namespace Lay\Util;
 
 use Lay\Http\Request;
 use Lay\Http\Response;
+use Lay\Core\AbstractSingleton;
 
-class RESTful {
-    protected static $_supported_http_methods = array('get', 'delete', 'post', 'put', 'options', 'patch', 'head');
+use RuntimeException;
+use Exception;
+
+class RESTful extends AbstractSingleton {
+    protected static $_supported_http_methods = array('get', 'delete', 'post', 'put', 'patch', 'head');
     protected static $_supported_formats = array(
         'xml'           => 'application/xml',
         'json'          => 'application/json',
@@ -20,9 +24,9 @@ class RESTful {
 
     protected $handler;
     protected $options = array();
-    public function __construct() {
+    protected function __construct() {
         if (!extension_loaded('curl'))
-            throw new \RuntimeException('Require curl extension');
+            throw new RuntimeException('Require curl extension');
     }
     public function __destruct() {
         $this->close();
@@ -49,19 +53,20 @@ class RESTful {
         curl_setopt_array($handler, $curl_options);
         $result = curl_exec($handler);
         if ($result === false)
-            throw new \RuntimeException('Curl Error: '. curl_error($handler), curl_errno($handler));
+            throw new RuntimeException('Curl Error: '. curl_error($handler), curl_errno($handler));
         $this->handler = $handler;
         return $result;
     }
-    public function send($protocal, $host, $resource, $rep = 'json', $state = 'GET', array $params = array(), array $upload = array()) {
+    public function send($scheme, $hostport, $resource, $rep = 'json', $state = 'GET', array $params = array(), array $upload = array(), $username = '', $password = '') {
         $method = strtoupper($state);
         // 数组必须用http_build_query转换为字符串
         // 否则会使用multipart/form-data而不是application/x-www-form-urlencoded
         //$params = http_build_query($params) ?: null;
         $rep = ltrim($rep, '.');
         $rep = empty($rep) ? '' : '.' . $rep;
-        $url = $protocal . '://' . $host . '/' . ltrim($resource, '/') . $rep;
+        $url = $scheme . '://' . $hostport . '/' . ltrim($resource, '/') . $rep;
         $options = array();
+        $options[CURLOPT_HTTPHEADER][] = 'X-HTTP-METHOD-OVERRIDE: '. $method;
         if ($method == 'GET' || $method == 'HEAD') {
             if ($params)
                 $url = $url .'?'. http_build_query($params);
@@ -76,14 +81,13 @@ class RESTful {
                 $options[CURLOPT_POST] = true;
             } elseif (static::$method_emulate) {
                 $options[CURLOPT_POST] = true;
-                $options[CURLOPT_HTTPHEADER][] = 'X-HTTP-METHOD-OVERRIDE: '. $method;
                 //$options[CURLOPT_POSTFIELDS] = $params;
             } else {
                 $options[CURLOPT_CUSTOMREQUEST] = $method;
             }
             if(!empty($upload) && $method == 'POST') {
                 foreach ($upload as $key => $file) {
-                    $upload[$key] = '@' . realpath(ltrim($file, '@'));//strpos($file, '@') === 0 ? '@'. realpath(substr($file, 1)) : '@'. realpath($file);
+                    $upload[$key] = '@' . realpath(ltrim($file, '@'));
                 }
                 $params = array_merge($params, $upload);
                 $options[CURLOPT_POSTFIELDS] = $params;
@@ -102,6 +106,53 @@ class RESTful {
         $message['header'] = preg_split('/\r\n/', substr($result, 0, $header_size), 0, PREG_SPLIT_NO_EMPTY);
         $message['body'] = $this->represent(substr($result, $header_size), $rep);
         return $message;
+    }
+    public function get($url, $path, $rep = 'json', array $params = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'GET', $params, array(), $user, $pass);
+    }
+    public function post($url, $path, $rep = 'json', array $params = array(), array $upload = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'POST', $params, $upload, $user, $pass);
+    }
+    public function put($url, $path, $rep = 'json', array $params = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'PUT', $params, $upload, $user, $pass);
+    }
+    public function delete($url, $path, $rep = 'json', array $params = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'DELETE', $params, $upload, $user, $pass);
+    }
+    public function head($url, $path, $rep = 'json', array $params = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'HEAD', $params, $upload, $user, $pass);
+    }
+    public function patch($url, $path, $rep = 'json', array $params = array()) {
+        list($scheme, $host, $port, $user, $pass, $param, $fragment) = $this->parse($url);
+        $params = array_merge($param, $params);
+        $this->send($scheme, "$host:$port", $path, $rep, 'PATCH', $params, $upload, $user, $pass);
+    }
+    private function parse($url) {
+        $params = array();
+        $info = parse_url($url);
+        $scheme = empty($info['scheme']) ? 'http' : $info['scheme'];
+        $host = empty($info['host']) ? '127.0.0.1' : $info['host'];
+        $port = empty($info['port']) ? 80 : $info['port'];
+        $user = empty($info['user']) ? '' : $info['user'];
+        $pass = empty($info['pass']) ? '' : $info['pass'];
+        $path = empty($info['path']) ? '/' : $info['path'];
+        $query = empty($info['query']) ? '' : $info['query'];
+        $fragment = empty($info['fragment']) ? '' : $info['fragment'];
+        !empty($query) && parse_str($query, $params);
+        //$pathinfo = pathinfo($path);
+        //$ext = empty($pathinfo['extension']) ? '' : $pathinfo['extension'];
+        //$path = empty($ext) ? $path : substr($path, -1, strlen($ext) + 1);
+        return array($scheme, $host, $port, $user, $pass, $param, $fragment);
     }
     public function getInfo($info = null) {
         if (!$this->handler)
@@ -124,7 +175,7 @@ class RESTful {
         return $ret;
     }
 
-    public static function get($key = null) {
+    /*public static function get($key = null) {
         if ($key === null) return $_GET;
         return isset($_GET[$key]) ? $_GET[$key] : null;
     }
@@ -153,9 +204,9 @@ class RESTful {
         return isset($_PUT[$key]) ? $_PUT[$key] : null;
     }
     public static function request($key = null) {
-        if ($key === null) return array_merge(put(), $_REQUEST);
+        if ($key === null) return array_merge(self::put(), $_REQUEST);
         return isset($_REQUEST[$key]) ? $_REQUEST[$key] : put($key);
-    }
+    }*/
     public static function has_get($key) {
         return array_key_exists($key, $_GET);
     }

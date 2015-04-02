@@ -250,12 +250,12 @@ abstract class Action extends AbstractAction {
             case 'xml':
                 $this->template->xml();
                 break;
+            case 'css':
+                $this->template->cssp();
+                break;
             case 'js':
             case 'jsonp':
                 $this->template->jsonp();
-                break;
-            case 'css':
-                $this->template->cssp();
                 break;
             case 'src':
                 $pathname = Autoloader::getClass(get_class($this));

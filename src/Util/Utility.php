@@ -277,7 +277,6 @@ class Utility {
             return false;
         }
         $nkey = preg_match('/^[A-Za-z_][A-Za-z0-9\-_]{0,}$/', $nkey) ? $nkey : '';
-        Logger::debug(self::x2str($value, $root, $nkey));
         return simplexml_load_string('<?xml version="1.0" encoding="' . $encoding . '"?>' . self::x2str($value, $root, $nkey))->asXml();
     }
     /**

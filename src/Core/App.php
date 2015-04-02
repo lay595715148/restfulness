@@ -35,9 +35,9 @@ abstract class App extends AbstractSingleton {
     const E_FINISH = 'app:event:finish';
 	public static $_rootpath;
     public static $_docpath;
-    public static $_logger;
     public static $_action;
     public static $_config;
+    public static $_logger;
     public static $_event;
     public static $_app;
     /**
@@ -47,7 +47,7 @@ abstract class App extends AbstractSingleton {
 	public static function start() {
         //ob start
         ob_start();
-        error_reporting(E_ALL);
+        error_reporting(E_ALL ^ E_STRICT);
         ini_set('output_buffering', 'on');
         ini_set('implicit_flush', 'off');
         try {
@@ -74,7 +74,7 @@ abstract class App extends AbstractSingleton {
             $log .= $err->getFile() . '(' . $err->getLine() . ")\n";
             $log .= $err->getTraceAsString() . "\n";
             $log .= "<===================================================================================\n";
-            Logger::error($log);
+            self::$_logger->error($log);
         }
 	}
 	/**
@@ -120,7 +120,7 @@ abstract class App extends AbstractSingleton {
                 self::$_action->initialize();
                 self::$_action->lifecycle();
             } else {
-                throw new \Exception($classname . ' not found!');
+                throw new Exception($classname . ' not found!');
             }
         } else {
             $this->klein = $klein = new Klein();
@@ -132,7 +132,7 @@ abstract class App extends AbstractSingleton {
                         self::$_action->initialize();
                         self::$_action->lifecycle();
                     } else {
-                        throw new \Exception($classname . ' not found!');
+                        throw new Exception($classname . ' not found!');
                     }
                 });
             }
