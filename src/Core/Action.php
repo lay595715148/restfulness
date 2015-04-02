@@ -10,6 +10,7 @@ use Lay\Core\Template;
 use Lay\Traits\Singleton;
 
 use Lay\Util\Logger;
+use Lay\Util\Utility;
 use Lay\Autoloader;
 
 abstract class Action extends AbstractAction {
@@ -97,6 +98,14 @@ abstract class Action extends AbstractAction {
      * @var Template
     */
     protected $template;
+
+    /**
+     * 清除前端缓存
+     */
+    public static function cleanCache() {
+        $cachedir = App::$_docpath . DIRECTORY_SEPARATOR . 'cache';
+        Utility::rmdir($cachedir, false);
+    }
     
     /**
      * 构造方法
@@ -232,6 +241,7 @@ abstract class Action extends AbstractAction {
         
     }
     protected function onRender() {
+        header('X-Powered-By: restfulness');
         $rep = $this->request->getExtension();
         switch ($rep) {
             case 'json':
@@ -239,6 +249,13 @@ abstract class Action extends AbstractAction {
                 break;
             case 'xml':
                 $this->template->xml();
+                break;
+            case 'js':
+            case 'jsonp':
+                $this->template->jsonp();
+                break;
+            case 'css':
+                $this->template->cssp();
                 break;
             case 'src':
                 $pathname = Autoloader::getClass(get_class($this));

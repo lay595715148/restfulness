@@ -6,6 +6,9 @@ return array(
 		),
 		'/a.[src|xml|json|csv:format]?' => array(
 			'class' => '\Lay\Cgi\A'
+		),
+		'/cache/clean' => array(
+			'class' => '\Lay\Cgi\Cache\Clean'
 		)
 	)
 );

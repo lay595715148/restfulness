@@ -8,9 +8,10 @@ use Exception;
 class Autoloader {
     private static $_classpath = __DIR__;
     private static $_classes = array();
+    private static $_cachedir = __DIR__;
     private static $_cachefile = 'restfulness.classes.php';
     private static $_caches = array();
-    private static $_cached = false;
+    private static $_dirty = false;
     /**
      * 
      * @return void
@@ -20,12 +21,14 @@ class Autoloader {
         self::addpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
         // 使用自定义的autoload方法
         spl_autoload_register(array('Lay\Autoloader', 'autoload'));
+        // 设置缓存文件目录
+        self::setCacheDir(sys_get_temp_dir());
         // 加载类文件路径缓存
         self::loadCache();
         // 注册shutdown事件
         register_shutdown_function(array('Lay\Autoloader', 'updateCache'));
         // Illuminate Suppport helpers
-        require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/Illuminate/Support/helpers.php';
+        //require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/Illuminate/Support/helpers.php';
         // underscore
         require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib/underscore.php';
         // klein
@@ -179,8 +182,8 @@ class Autoloader {
      *
      * @return void
      */
-    public static function loadCache() {
-        $cachename = realpath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::$_cachefile);
+    private static function loadCache() {
+        $cachename = realpath(self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile);
         if(is_file($cachename)) {
             self::$_caches = include $cachename;
         } else {
@@ -191,15 +194,25 @@ class Autoloader {
         }
     }
     /**
+     * 清除类路径缓存文件
+     *
+     * @return void
+     */
+    public static function cleanCache() {
+        $cachename = realpath(self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile);
+        if(is_file($cachename)) {
+            @unlink($cachename);
+        }
+    }
+    /**
      * 更新类路径缓存
      *
      * @return boolean
      */
     public static function updateCache() {
-        //Logger::info('self::$_cached:' . self::$_cached);
-        if(! empty(self::$_cached)) {
+        if(! empty(self::$_dirty)) {
             // 先读取，再merge，再存储
-            $cachename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::$_cachefile;
+            $cachename = self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile;
             if(is_file($cachename)) {
                 $caches = include realpath($cachename);
                 self::$_caches = array_merge($caches, self::$_caches);
@@ -210,11 +223,29 @@ class Autoloader {
             $result = fwrite($handle, $content);
             $return = fflush($handle);
             $return = fclose($handle);
-            self::$_cached = false;
+            self::$_dirty = false;
             return $result;
         } else {
             return false;
         }
+    }
+    /**
+     * 设置类路径缓存文件所在目录
+     *
+     * @return boolean
+     */
+    public static function setCacheDir($dirpath) {
+        if($dir = realpath($dirpath)) {
+            self::$_cachedir = $dir;
+        }
+    }
+    /**
+     * 获取类路径缓存文件所在目录
+     *
+     * @return string
+     */
+    public static function getCacheDir() {
+        return self::$_cachedir;
     }
     /**
      * 设置新的类路径缓存
@@ -225,8 +256,8 @@ class Autoloader {
      *            类文件路径
      * @return void
      */
-    private static function setCache($classname, $filepath) {
-        self::$_cached = true;
+    public static function setCache($classname, $filepath) {
+        self::$_dirty = true;
         self::$_caches[$classname] = realpath($filepath);
     }
     /**

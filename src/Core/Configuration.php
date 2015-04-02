@@ -17,8 +17,9 @@ use Lay\Util\Utility;
 class Configuration extends AbstractSingleton {
     private static $_config = array();
     private static $_cachefile = 'restfulness.config.php';
+    private static $_cachedir = __DIR__;
     private static $_caches = array();
-    private static $_cached = false;
+    private static $_dirty = false;
     /**
      * 获取配置数据访问类实例
      * 
@@ -34,18 +35,14 @@ class Configuration extends AbstractSingleton {
      */
     public static function initialize() {
         $path = App::$_rootpath;
+        // 设置缓存文件目录
+        self::setCacheDir(sys_get_temp_dir());
         // 加载配置缓存
         $config = self::loadCache();
-        // 没有缓存，加载配置
-        if(empty($config)) {
-            $envfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'env.php';
-            self::configure($envfile);
-            $env = self::get('env', 'test');
-            $configfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'main.' . $env . '.php';
-            self::configure($configfile);
-        }
         // 注册shutdown事件
         register_shutdown_function(array('Lay\Core\Configuration', 'updateCache'));
+        // 没有缓存配置，加载配置
+        empty($config) && self::load();
     }
     /**
      * 加载并设置配置
@@ -92,13 +89,26 @@ class Configuration extends AbstractSingleton {
         }
     }
     /**
+     * 加载配置信息
+     *
+     * @return void
+     */
+    public static function load() {
+        $path = App::$_rootpath;
+        $envfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'env.php';
+        self::configure($envfile);
+        $env = self::get('env', 'test');
+        $configfile = $path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'main.' . $env . '.php';
+        self::configure($configfile);
+    }
+    /**
      * 加载配置信息缓存
      *
      * @return void
      */
     private static function loadCache() {
         $rootpath = App::$_rootpath;
-        $cachename = realpath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::$_cachefile);
+        $cachename = realpath(self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile);
         if(is_file($cachename)) {
             self::$_caches = include $cachename;
         } else {
@@ -110,28 +120,54 @@ class Configuration extends AbstractSingleton {
         return self::$_config;
     }
     /**
+     * 清除配置信息缓存文件
+     *
+     * @return void
+     */
+    public static function cleanCache() {
+        $cachename = realpath(self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile);
+        if(is_file($cachename)) {
+            @unlink($cachename);
+        }
+    }
+    /**
      * 更新配置信息缓存
      *
      * @return boolean
      */
     public static function updateCache() {
-        //Logger::info('self::$_cached:' . self::$_cached);
-        if(! empty(self::$_cached)) {
+        if(! empty(self::$_dirty)) {
             // 先读取，再merge，再存储
-            $cachename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::$_cachefile;
-            //$caches = include realpath($cachename);
-            //self::$_caches = array_merge(self::$_config, self::$_caches);
+            $cachename = self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile;
             // 写入
             $content = Utility::array2PHPContent(self::$_caches);
             $handle = fopen($cachename, 'w');
             $result = fwrite($handle, $content);
             $return = fflush($handle);
             $return = fclose($handle);
-            self::$_cached = false;
+            self::$_dirty = false;
             return $result;
         } else {
             return false;
         }
+    }
+    /**
+     * 设置配置信息缓存文件所在目录
+     *
+     * @return boolean
+     */
+    public static function setCacheDir($dirpath) {
+        if($dir = realpath($dirpath)) {
+            self::$_cachedir = $dir;
+        }
+    }
+    /**
+     * 获取配置信息缓存文件所在目录
+     *
+     * @return string
+     */
+    public static function getCacheDir() {
+        return self::$_cachedir;
     }
     /**
      * 设置新的配置项缓存
@@ -143,7 +179,7 @@ class Configuration extends AbstractSingleton {
      * @return void
      */
     private static function setCache($key, $value) {
-        self::$_cached = true;
+        self::$_dirty = true;
         self::$_caches[$key] = $value;
     }
     /**

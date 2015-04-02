@@ -339,7 +339,7 @@ class Utility {
      * @param string $dir
      * @return boolean
      */
-    public static function rmdir($dir) {
+    public static function rmdir($dir, $involve = true) {
         $dir = realpath($dir);
         if (is_dir($dir) && $handle = opendir($dir)) {
             while( false !== ($item = readdir($handle))) {
@@ -352,7 +352,7 @@ class Utility {
                 }
             }
             closedir($handle);
-            rmdir($dir);
+            $involve && rmdir($dir);
         } else {
             return false;
         }
@@ -417,7 +417,7 @@ class Utility {
      * @param array $array
      * @return boolean
      */
-    public static function is_assoc_array($array) {
+    public static function isAssocArray($array) {
         $keys = array_keys($array);
         return array_keys($keys) !== $keys;
     }

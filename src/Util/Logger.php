@@ -111,7 +111,7 @@ class Logger extends AbstractSingleton {
      * @param int $level
      * @param string $line_delimiter
      */
-    public function write($var, $name = 'lay', $level = 0, $line_delimiter = "\n") {
+    public function write($var, $name = 'restfulness', $level = 0, $line_delimiter = "\n") {
     	if($this->level === true || ($this->level && $this->regular(intval($this->level), $level))) {
 	    	$lv = strtolower($this->parseLevel($level));
 	        $file = $this->dir . DIRECTORY_SEPARATOR .  'log' . DIRECTORY_SEPARATOR . "$name.$lv.log";
@@ -131,7 +131,7 @@ class Logger extends AbstractSingleton {
      *            是否强制打印输出，默认非
      * @return void
      */
-    public static function debug($msg, $tag = 'lay') {
+    public static function debug($msg, $tag = 'restfulness') {
     	self::getInstance()->write($msg, $tag, self::L_DEBUG);
     }
     /**
@@ -143,7 +143,7 @@ class Logger extends AbstractSingleton {
      *            标签名
      * @return void
      */
-    public static function info($msg, $tag = 'lay') {
+    public static function info($msg, $tag = 'restfulness') {
         self::getInstance()->write($msg, $tag, self::L_INFO);
     }
     /**
@@ -155,7 +155,7 @@ class Logger extends AbstractSingleton {
      *            标签名
      * @return void
      */
-    public static function warning($msg, $tag = 'lay') {
+    public static function warning($msg, $tag = 'restfulness') {
         self::warn($msg, $tag);
     }
     /**
@@ -167,7 +167,7 @@ class Logger extends AbstractSingleton {
      *            标签名
      * @return void
      */
-    public static function warn($msg, $tag = 'lay') {
+    public static function warn($msg, $tag = 'restfulness') {
         self::getInstance()->write($msg, $tag, self::L_WARN);
     }
     /**
@@ -180,7 +180,7 @@ class Logger extends AbstractSingleton {
      * @return void
      * @throws Exception
      */
-    public static function error($msg, $tag = 'lay') {
+    public static function error($msg, $tag = 'restfulness') {
         self::getInstance()->write($msg, $tag, self::L_ERROR);
     }
     /**
@@ -192,7 +192,7 @@ class Logger extends AbstractSingleton {
      *            标签名
      * @return void
      */
-    public static function log($msg, $tag = 'lay') {
+    public static function log($msg, $tag = 'restfulness') {
         self::getInstance()->write($msg, $tag, self::L_LOG);
     }
     

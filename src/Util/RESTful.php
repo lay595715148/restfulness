@@ -12,6 +12,7 @@ class RESTful {
         'jsonp'         => 'application/javascript',
         'serialized'    => 'application/vnd.php.serialized',
         'php'           => 'text/plain',
+        'css'           => 'text/css',
         'html'          => 'text/html',
         'csv'           => 'application/csv'
     );

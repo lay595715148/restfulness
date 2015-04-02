@@ -21,6 +21,7 @@ class Ass extends Action {
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";
 			__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
 		} else {*/
+			__::each(array(1, 2, 3), function($num) { echo $num . ','; }); // 1,2,3,
 			$string = Pinyin::parse('第二个参数随意设置', array('accent' => false));
 			//print_r($string);
 			//$u = new User();
