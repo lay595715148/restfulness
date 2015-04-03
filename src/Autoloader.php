@@ -2,6 +2,7 @@
 namespace Lay;
 
 use Lay\Util\Utility;
+use Lay\Core\App;
 
 use Exception;
 
@@ -211,6 +212,7 @@ class Autoloader {
      */
     public static function updateCache() {
         if(! empty(self::$_dirty)) {
+            App::$_logger->debug('update cache');
             // 先读取，再merge，再存储
             $cachename = self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile;
             if(is_file($cachename)) {
