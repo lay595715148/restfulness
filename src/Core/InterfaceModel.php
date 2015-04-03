@@ -3,8 +3,8 @@ namespace Lay\Core;
 
 use Lay\Core\Bean;
 
-abstract class AbstractModel extends Bean {
-	protected $db = null;
+interface class InterfaceModel {
+	protected $db;
 	public abstract function get($id, $options = array());
 	public abstract function add(array $info, $options = array());
 	public abstract function del($id, $options = array());
@@ -30,7 +30,6 @@ abstract class AbstractModel extends Bean {
      * @return string
      */
     public abstract function schema();
-
 }
 
 // PHP END

@@ -1,10 +1,10 @@
 <?php
 namespace Lay\Core;
 
-use ArrayAccess;
+use Lay\Core\InterfaceBean;
 use ReflectionObject;
 
-abstract class Bean extends ArrayAccess {
+abstract class Bean implements InterfaceBean {
 	protected $properties = array();
     protected function propDefault($key) {
         return null;
@@ -52,7 +52,7 @@ abstract class Bean extends ArrayAccess {
     public function offsetUnset($index) {
         unset($this->$index);
     }
-    
+
     public function toArray() {
         $ref = new ReflectionObject($this);
         $props = $ref->getProperties(ReflectionProperty::IS_PUBLIC);

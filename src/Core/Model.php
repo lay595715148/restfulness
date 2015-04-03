@@ -2,8 +2,9 @@
 namespace Lay\Core;
 
 use Lay\Core\AbstractModel;
+use Lay\Core\InterfaceModel;
 
-abstract class Model extends AbstractModel {
+abstract class Model extends Bean implements InterfaceModel {
     public abstract function save() {
         // TODO
         $pk = $this->primary();
