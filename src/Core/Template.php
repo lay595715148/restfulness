@@ -7,10 +7,12 @@ use Lay\Core\AbstractSingleton;
 use Lay\Util\Utility;
 use Lay\Util\Logger;
 use Lay\Core\App;
+use Lay\Traits\Singleton;
 
 use Exception;
 
-class Template extends AbstractSingleton {
+class Template {
+    use Singleton;
     /**
      * HttpRequest对象
      *

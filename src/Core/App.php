@@ -24,11 +24,13 @@ use Lay\Web\User;
 use Lay\Http\Request;
 use Lay\Cgi\Index as CgiIndex;
 use Lay\Cli\Index as CliIndex;
+use Lay\Traits\Singleton;
 
 use Exception;
 use ErrorException;
 
-abstract class App extends AbstractSingleton {
+abstract class App {
+    use Singleton;
     const E_BEFORE = 'app:event:before';
     const E_RUN = 'app:event:run';
     const E_AFTER = 'app:event:after';

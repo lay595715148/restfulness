@@ -16,6 +16,7 @@ class Ass extends Action {
 		headers_sent() || header("Content-type: text/html; charset=utf-8");
 	}
 	public function onGet() {
+		\Lay\Cgi\Model\User::getInstance();
 		/*if($this->request->getExtension() == 'src') {
 			highlight_string(file_get_contents(__FILE__));
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";

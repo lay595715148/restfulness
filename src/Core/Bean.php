@@ -37,13 +37,13 @@ abstract class Bean implements InterfaceBean {
      * @return void
      */
     public final function __unset($name) {
-    	return unset($this->properties[$name]);
+    	unset($this->properties[$name]);
     }
 
     public function offsetExists($index) {
         return property_exists($this, $index);
     }
-    public function offsetGet($index) {
+    public function &offsetGet($index) {
         return $this->$index;
     }
     public function offsetSet($index, $value) {

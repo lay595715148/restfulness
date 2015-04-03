@@ -1,39 +1,43 @@
 <?php
 namespace Lay\Core;
 
-abstract class AbstractAction {
+interface InterfaceAction {
     /**
      * 创建事件触发方法
      */
-    protected abstract function onCreate();
+    public function onCreate();
     /**
      * GET事件触发方法
      */
-    protected abstract function onGet();
+    public function onGet();
     /**
      * POST事件触发方法
      */
-    protected abstract function onPost();
+    public function onPost();
     /**
      * PUT事件触发方法
      */
-    protected abstract function onPut();
+    public function onPut();
     /**
      * DELETE事件触发方法
      */
-    protected abstract function onDelete();
+    public function onDelete();
     /**
      * HEAD事件触发方法
      */
-    protected abstract function onHead();
+    public function onHead();
     /**
      * PATCH事件触发方法
      */
-    protected abstract function onPatch();
+    public function onPatch();
     /**
      * OPTIONS事件触发方法
      */
-    protected abstract function onOptions();
+    public function onOptions();
+    /**
+     * 创建事件触发方法
+     */
+    public function onRender();
 }
 
 // PHP END

@@ -8,26 +8,20 @@ namespace Lay\Core;
 
 use Lay\Core\AbstractSingleton;
 use Lay\Util\Utility;
+use Lay\Traits\Singleton;
 
 /**
  * 配置数据访问类
  *
  * @author Lay Li
  */
-class Configuration extends AbstractSingleton {
+class Configuration {
+    use Singleton;
     private static $_config = array();
     private static $_cachefile = 'restfulness.config.php';
     private static $_cachedir = __DIR__;
     private static $_caches = array();
     private static $_dirty = false;
-    /**
-     * 获取配置数据访问类实例
-     * 
-     * @return Configuration
-     */
-    public static function getInstance() {
-        return parent::getInstance();
-    }
 
     /**
      * 初始化配置项

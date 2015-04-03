@@ -6,6 +6,7 @@ use Lay\Core\EventEmitter;
 use Lay\Http\Request;
 use Lay\Http\Response;
 use Lay\Core\Template;
+use Lay\Core\InterfaceAction;
 
 use Lay\Traits\Singleton;
 
@@ -13,7 +14,7 @@ use Lay\Util\Logger;
 use Lay\Util\Utility;
 use Lay\Autoloader;
 
-abstract class Action extends AbstractAction {
+abstract class Action implements InterfaceAction {
 	use Singleton;
 	//use Lay\Traits\Action;
     /**
@@ -182,7 +183,7 @@ abstract class Action extends AbstractAction {
      * 返回HttpReponse
      * @return HttpReponse
      */
-     public function getResponse() {
+    public function getResponse() {
         return $this->response;
     }
     /**
@@ -208,39 +209,39 @@ abstract class Action extends AbstractAction {
      * 创建事件触发方法
      * @see \lay\core\AbstractAction::onCreate()
      */
-    protected function onCreate() {
+    public function onCreate() {
         
     }
     /**
      * GET事件触发方法
      * @see \lay\core\AbstractAction::onGet()
      */
-    protected function onGet() {
+    public function onGet() {
         
     }
     /**
      * POST事件触发方法
      * @see \lay\core\AbstractAction::onPost()
      */
-    protected function onPost() {
+    public function onPost() {
         
     }
-    protected function onPut() {
+    public function onPut() {
         
     }
-    protected function onDelete() {
+    public function onDelete() {
         
     }
-    protected function onPatch() {
+    public function onPatch() {
         
     }
-    protected function onHead() {
+    public function onHead() {
         
     }
-    protected function onOptions() {
+    public function onOptions() {
         
     }
-    protected function onRender() {
+    public function onRender() {
         header('X-Powered-By: restfulness');
         $rep = $this->request->getExtension();
         switch ($rep) {

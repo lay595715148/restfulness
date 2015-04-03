@@ -6,8 +6,10 @@ use Lay\Core\App;
 
 use Lay\Util\Logger;
 use Lay\Util\Utility;
+use Lay\Traits\Singleton;
 
-class EventEmitter extends AbstractSingleton {
+class EventEmitter {
+    use Singleton;
     protected $listen = array();
     protected $subscribe = array();
     public function initialize() {
