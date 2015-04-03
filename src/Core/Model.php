@@ -7,19 +7,8 @@ use Lay\Core\InterfaceModel;
 use Lay\Traits\Singleton;
 
 abstract class Model extends Bean implements InterfaceModel {
+    use Singleton;
     protected $db;
-    protected static $_singletonStack = array();
-    protected function __construct() {}
-    public function __clone() {
-        throw new RuntimeException('Cloning '. __CLASS__ .' is not allowed');
-    }
-    public static function getInstance() {
-        $classname = get_called_class();
-        if (empty(self::$_singletonStack[$classname])){
-            self::$_singletonStack[$classname] = new $classname();
-        }
-        return self::$_singletonStack[$classname];
-    }
     public function save() {
         // TODO
         $pk = $this->primary();
