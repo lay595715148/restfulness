@@ -4,7 +4,7 @@ namespace Lay\Core;
 use ArrayAccess;
 use ReflectionObject;
 
-abstract class AbstractBean extends ArrayAccess {
+abstract class Bean extends ArrayAccess {
 	protected $properties = array();
     protected function propDefault($key) {
         return null;
@@ -52,6 +52,7 @@ abstract class AbstractBean extends ArrayAccess {
     public function offsetUnset($index) {
         unset($this->$index);
     }
+    
     public function toArray() {
         $ref = new ReflectionObject($this);
         $props = $ref->getProperties(ReflectionProperty::IS_PUBLIC);
