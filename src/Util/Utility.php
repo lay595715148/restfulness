@@ -317,13 +317,31 @@ class Utility {
         /** loop through array  */
         foreach ($input as $line) {
             /** default php csv handler **/
-            fputcsv($handler, (array)$line, $delimiter);
+            fputcsv($handler, array_map('Lay\Util\Utility::mixed2String', (array)$line), $delimiter);
         }
         /** rewrind the "file" with the csv lines **/
         fseek($handler, 0);
         $output = stream_get_contents($handler);
         fclose($handler);
         return $output;
+    }
+    /**
+     * php var to string
+     * @param mixed $mixed
+     * @return string
+     */
+    public static function mixed2String($mixed) {
+        if(is_scalar($mixed)) {
+            return strval($mixed);
+        } else if(is_array($mixed)) {
+            return json_encode($mixed);
+        } else if(is_object($mixed)) {
+            if(method_exists($mixed, 'toArray')) {
+                return self::mixed2String($mixed->toArray());
+            } else {
+                return self::mixed2String(get_object_vars($mixed));
+            }
+        }
     }
     /**
      * 递归创建文件夹目录

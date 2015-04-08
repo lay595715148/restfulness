@@ -396,8 +396,8 @@ class Template {
             foreach($this->headers as $header) {
                 header($header);
             }
-            // set javascript data string
-            $results = implode("\n", $this->vars);
+            // set css data string
+            $results = Utility::array2CSS($this->vars);
             // send
             echo $results;
         }

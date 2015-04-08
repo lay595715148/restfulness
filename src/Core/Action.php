@@ -254,6 +254,9 @@ abstract class Action implements InterfaceAction {
             case 'css':
                 $this->template->cssp();
                 break;
+            case 'csv':
+                $this->template->csv();
+                break;
             case 'js':
             case 'jsonp':
                 $this->template->jsonp();
