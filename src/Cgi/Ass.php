@@ -11,6 +11,8 @@ use Respect\Validation\Validator as v;
 
 use Overtrue\Pinyin\Pinyin;
 
+use Lay\Cgi\Bean\User;
+
 class Ass extends Action {
 	public function onCreate() {
 		headers_sent() || header("Content-type: text/html; charset=utf-8");
@@ -27,15 +29,14 @@ class Ass extends Action {
 			//print_r($string);
 			//$u = new User();
 			$rest = RESTful::getInstance();
-			$parse = parse_url('http://cgi.restfulness.laysoft.cn/ass.json?json=012');
-	        $pathinfo = pathinfo($parse['path']);
-	        $ext = empty($pathinfo['extension']) ? '' : $pathinfo['extension'];
 			//$cgi = CgiIndex::getInstance();
 			//$cli = CliIndex::getInstance();
 			$res = $rest->send('http','cgi.restfulness.laysoft.cn', '/a', 'json', 'POST', array('post' => 1), array('ascii' => 'E:/lli/ascii.art.txt'));//
 			//headers_sent() || header("Content-type: text/html; charset=utf-8");
 			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
-			$this->template->push(array('parse' => $ext, 'pinyin' => $pinyin, 'body' => $res['body']));
+			$bean = new User();
+			$bean->name = array('first' => 'Lay', 'last' => 'Li');
+			$this->template->push(array('parse' => $bean, 'pinyin' => $pinyin, 'body' => $res['body']));
 			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';

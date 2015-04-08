@@ -1,66 +1,130 @@
 <?php
 namespace Lay\Core;
 
+use Lay\Core\Base;
+use Lay\Util\Logger;
+use Lay\Util\Utility;
 use Lay\Core\InterfaceBean;
 use ReflectionObject;
+use ReflectionProperty;
+use Iterator;
+use ArrayAccess;
+use stdClass;
 
-abstract class Bean implements InterfaceBean {
-	protected $properties = array();
-    protected function propDefault($key) {
-        return null;
-    }
-
-    public final function __set($key, $value) {
-        $this->properties[$key] = $value;
-    }
-    public final function __get($key) {
-        if (!isset($this->properties[$key])) {
-            $this->properties[$key] = $this->propDefault($key);
+abstract class Bean extends Base implements InterfaceBean {
+    public final function __construct() {
+        //初始化值
+        foreach ($this->properties() as $name => $value) {
+            $this->$name = $value;
         }
-        return $this->properties[$key];
     }
     /**
-     * 检测属性是否设置
-     *
-     * @param string $name
-     *            属性名
-     * @return boolean
+     * @see Base::properties()
      */
-    public final function __isset($name) {
-        return isset($this->properties[$name]);
+    public function properties() {
+        return array();
     }
     /**
-     * 将某个属性去除
-     *
-     * @param string $name
-     *            属性名
-     * @return void
+     * @see Base::rules()
      */
-    public final function __unset($name) {
-    	unset($this->properties[$name]);
+    public function rules() {
+        return array();
+    }
+    /**
+     * @see Base::format()
+     */
+    public function format($val, $options = array()) {
+        return $val;
     }
 
-    public function offsetExists($index) {
-        return property_exists($this, $index);
+    /**
+     * 清空对象所有属性值
+     * @return InterfaceBean
+     */
+    public final function restore() {
+        $rules = $this->rules();
+        $properties = $this->properties();
+        foreach ($properties as $name => $v) {
+            $this->$name = $v;
+        }
+        return $this;
     }
-    public function &offsetGet($index) {
-        return $this->$index;
-    }
-    public function offsetSet($index, $value) {
-        $this->$index = $value;
-    }
-    public function offsetUnset($index) {
-        unset($this->$index);
-    }
-
-    public function toArray() {
-        $ref = new ReflectionObject($this);
-        $props = $ref->getProperties(ReflectionProperty::IS_PUBLIC);
+    /**
+     * 返回对象属性名对属性值的数组
+     * @return array
+     */
+    public final function toArray() {
         $ret = array();
-        foreach ($props as $prop) {
-            $ret[$prop->name] = $this[$prop->name];
+        foreach ($this->properties() as $name => $def) {
+            $ret[$name] = $this->_toArray($this[$name]);
         }
         return $ret;
+    }
+    /**
+     * 迭代返回对象属性名对属性值的数组
+     * @param mixed $val            
+     * @return mixed
+     */
+     protected final function _toArray($val) {
+        if(is_array($val)) {
+            $var = array();
+            foreach($val as $k => $v) {
+                $var[$k] = $this->_toArray($v);
+            }
+            return $var;
+        } else if(is_object($val) && method_exists($val, 'toArray')) {
+            return $var->toArray();
+        } else if(is_object($val)) {
+            return $this->_toArray(get_object_vars($val));
+        } else {
+            return $val;
+        }
+    }
+    /**
+     * 返回对象转换为stdClass后的对象
+     * @return stdClass
+     */
+    public final function toStandard() {
+        $ret = new stdClass();
+        foreach ($this->properties() as $name => $value) {
+            $ret->$name = $this->_toStandard($this[$name]);
+        }
+        return $ret;
+    }
+    /**
+     * 迭代返回对象转换为stdClass后的对象
+     * @param mixed $var            
+     * @return mixed
+     */
+    protected function _toStandard($val) {
+        if(is_array($val) && Utility::isAssocArray($val)) {
+            $var = new stdClass();
+            foreach($val as $k => $v) {
+                $var->$k = $this->_toStandard($v);
+            }
+            return $var;
+        } else if(is_array($val)) {
+            $var = array();
+            foreach($val as $k => $v) {
+                $var[$k] = $this->_toStandard($v);
+            }
+            return $var;
+        } else if(is_object($val) && method_exists($val, 'toStandard')) {
+            return $var->toStandard();
+        } else if(is_object($val)) {
+            return $this->_toArray(get_object_vars($val));
+        } else {
+            return $val;
+        }
+    }
+
+    /**
+     * json serialize function
+     * 
+     * @return stdClass
+     */
+    public function jsonSerialize() {
+        return $this->toStandard();
     }
 }
 

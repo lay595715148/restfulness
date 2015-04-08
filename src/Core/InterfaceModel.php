@@ -29,5 +29,10 @@ interface InterfaceModel {
      * @return string
      */
     public function schema();
+    /**
+     * 返回对象属性名对属性值的数组
+     * @return array
+     */
+    public function toArray();
 }
 // PHP END

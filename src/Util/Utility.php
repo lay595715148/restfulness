@@ -40,12 +40,14 @@ class Utility {
      * @return array
      */
     public static function toPureArray($arr) {
-        if(is_array($arr) || is_object($arr)) {
-            $tmp = array();
-            foreach($arr as $i => $a) {
-                $tmp[] = $a;
+        if(is_array($arr)) {
+            return array_values($arr);
+        } else if(is_object($arr)) {
+            if(method_exists($arr, 'toArray')) {
+                return self::toPureArray($arr->toArray());
+            } else {
+                return self::toPureArray(get_object_vars($arr));
             }
-            return $tmp;
         } else if(! is_resource($arr)) {
             return (array)$arr;
         } else {

@@ -4,6 +4,12 @@ namespace Lay\Cgi\Model;
 use Lay\Core\Model;
 
 class User extends Model {
+	public function properties() {
+		return array(
+			'id' => 0,
+			'name' => ''
+		);
+	}
 	public function get($id, $options = array()) {
 		
 	}
@@ -48,3 +54,4 @@ class User extends Model {
 		
 	}
 }
+// PHP END

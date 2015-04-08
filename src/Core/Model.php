@@ -1,21 +1,51 @@
 <?php
 namespace Lay\Core;
 
-use Lay\Core\AbstractModel;
+use Lay\Core\Base;
 use Lay\Core\InterfaceModel;
 
 use Lay\Traits\Singleton;
 
-abstract class Model extends Bean implements InterfaceModel {
+abstract class Model extends Base implements InterfaceModel {
     use Singleton;
     protected $db;
+    /**
+     * @see Base::properties()
+     */
+    public function properties() {
+        return array();
+    }
+    /**
+     * @see Base::rules()
+     */
+    public function rules() {
+        return array();
+    }
+    /**
+     * @see Base::format()
+     */
+    public function format($val, $options = array()) {
+        return $val;
+    }
+    /**
+     * 返回对象属性名对属性值的数组
+     * @return array
+     */
+    public final function toArray() {
+        $ret = array();
+        foreach ($this->properties() as $name => $def) {
+            $ret[$name] = strval($this[$name]);
+        }
+        return $ret;
+    }
+
     public function save() {
         // TODO
         $pk = $this->primary();
         $data = $this->toArray();
-        $data = array_filter($data, function ($var) {
+        /*$data = array_filter($data, function ($var) {
             return $var !== null;
-        });
+        });*/
         if ($this->$pk) {
             unset($data[$pk]);
             $this->upd($this->$pk, $data);
