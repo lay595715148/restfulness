@@ -73,7 +73,7 @@ abstract class Bean extends Base implements InterfaceBean {
             }
             return $var;
         } else if(is_object($val) && method_exists($val, 'toArray')) {
-            return $var->toArray();
+            return $val->toArray();
         } else if(is_object($val)) {
             return $this->_toArray(get_object_vars($val));
         } else {
@@ -110,7 +110,7 @@ abstract class Bean extends Base implements InterfaceBean {
             }
             return $var;
         } else if(is_object($val) && method_exists($val, 'toStandard')) {
-            return $var->toStandard();
+            return $val->toStandard();
         } else if(is_object($val)) {
             return $this->_toArray(get_object_vars($val));
         } else {

@@ -35,8 +35,9 @@ class Ass extends Action {
 			//headers_sent() || header("Content-type: text/html; charset=utf-8");
 			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
 			$bean = new User();
-			$bean->name = array('first' => 'Lay', 'last' => 'Li');
-			$this->template->push(array('parse' => $bean, 'pinyin' => $pinyin, 'body' => $res['body']));
+			$bean->name = array('first' => 'Lay', 'last' => 'Li' , 'self' => new User());
+			$bean->nick = 'nick';
+			$this->template->push(array('parse' => $bean->toStandard(), 'pinyin' => $pinyin, 'body' => $res['body']));
 			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';

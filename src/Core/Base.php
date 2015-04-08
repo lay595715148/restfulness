@@ -109,7 +109,6 @@ abstract class Base implements ArrayAccess, Iterator {
     public final function __set($name, $value) {
         if(isset($this->$name)) {
             $rules = $this->rules();
-            if($key == 'name') Logger::debug(json_encode($value));
             if(! empty($rules) && array_key_exists($name, $rules)) {
                 switch($rules[$name]) {
                     case self::PROPETYPE_IGNORE:
