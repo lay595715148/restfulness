@@ -6,10 +6,10 @@ trait Singleton {
     protected static $instance;
     protected function __construct() {}
     public function __clone() {
-        throw new \RuntimeException('Cloning '. __CLASS__ .' is not allowed');
+        throw new \RuntimeException('Cloning '. get_called_class() .' is not allowed');
     }
     public static function getInstance() {
-        return static::$instance ? null : (static::$instance = new static);
+        return static::$instance ? static::$instance : (static::$instance = new static);
     }
 }
 

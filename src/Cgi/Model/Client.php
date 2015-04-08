@@ -3,11 +3,11 @@ namespace Lay\Cgi\Model;
 
 use Lay\Core\Model;
 
-class User extends Model {
+class Client extends Model {
 	public function properties() {
 		return array(
 			'id',
-			'name'
+			'nick'
 		);
 	}
 	public function get($id, $options = array()) {
@@ -39,7 +39,7 @@ class User extends Model {
     public function columns() {
 		return array(
 			'id' => 'id',
-			'name' => 'name'
+			'nick' => 'nick'
 		);
 	}
     /**

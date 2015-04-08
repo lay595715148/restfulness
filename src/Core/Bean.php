@@ -42,10 +42,9 @@ abstract class Bean extends Base implements InterfaceBean {
      * @return InterfaceBean
      */
     public final function restore() {
-        $rules = $this->rules();
-        $properties = $this->properties();
-        foreach ($properties as $name => $v) {
-            $this->$name = $v;
+        // 恢复默认值
+        foreach ($this->properties() as $name => $value) {
+            $this->$name = $value;
         }
         return $this;
     }

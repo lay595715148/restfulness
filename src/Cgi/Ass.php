@@ -18,7 +18,8 @@ class Ass extends Action {
 		headers_sent() || header("Content-type: text/html; charset=utf-8");
 	}
 	public function onGet() {
-		\Lay\Cgi\Model\User::getInstance();
+		$model = \Lay\Cgi\Model\User::getInstance();
+		$model->name = 'Lay Li';
 		/*if($this->request->getExtension() == 'src') {
 			highlight_string(file_get_contents(__FILE__));
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";
@@ -35,9 +36,10 @@ class Ass extends Action {
 			//headers_sent() || header("Content-type: text/html; charset=utf-8");
 			//echo '<pre>';print_r(array($string, $res['body']));echo '</pre>';
 			$bean = new User();
+			//$model = \Lay\Cgi\Model\User::getInstance();
 			$bean->name = array('first' => 'Lay', 'last' => 'Li' , 'self' => new User());
 			$bean->nick = 'nick';
-			$this->template->push(array('parse' => $bean->toStandard(), 'pinyin' => $pinyin, 'body' => $res['body']));
+			$this->template->push(array('parse' => \Lay\Cgi\Model\Client::getInstance(), 'pinyin' => $pinyin, 'body' => $res['body']));
 			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';

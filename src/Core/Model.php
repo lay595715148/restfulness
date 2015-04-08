@@ -8,7 +8,13 @@ use Lay\Traits\Singleton;
 
 abstract class Model extends Base implements InterfaceModel {
     use Singleton;
-    protected $db;
+    protected $db = array();
+    /**
+     * 构造方法
+     * @return Model
+     */
+    protected function __construct() {
+    }
     /**
      * @see Base::properties()
      */
@@ -33,7 +39,7 @@ abstract class Model extends Base implements InterfaceModel {
      */
     public final function toArray() {
         $ret = array();
-        foreach ($this->properties() as $name => $def) {
+        foreach ($this->properties() as $name) {
             $ret[$name] = strval($this[$name]);
         }
         return $ret;
