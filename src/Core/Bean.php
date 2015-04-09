@@ -55,7 +55,7 @@ abstract class Bean extends Base implements InterfaceBean {
     public final function toArray() {
         $ret = array();
         foreach ($this->properties() as $name => $def) {
-            $ret[$name] = $this->_toArray($this[$name]);
+            $ret[$name] = $this->_toArray($this->$name);
         }
         return $ret;
     }

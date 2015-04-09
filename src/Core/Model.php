@@ -8,7 +8,6 @@ use Lay\Traits\Singleton;
 
 abstract class Model extends Base implements InterfaceModel {
     use Singleton;
-    protected $db = array();
     /**
      * 构造方法
      * @return Model
@@ -45,6 +44,18 @@ abstract class Model extends Base implements InterfaceModel {
         return $ret;
     }
 
+    public function get($id, $options = array()) {
+        
+    }
+    public function add(array $info, $options = array()) {
+
+    }
+    public function del($id, $options = array()) {
+
+    }
+    public function upd($id, array $info, $options = array()) {
+
+    }
     public function save() {
         // TODO
         $pk = $this->primary();

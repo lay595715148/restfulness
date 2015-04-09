@@ -171,7 +171,7 @@ abstract class Base implements ArrayAccess, Iterator {
      * @param string $name 属性名
      * @return void
      */
-    public final function __get($key) {
+    public final function __get($name) {
         if(isset($this->$name)) {
             return $this->$name;
         } else {
@@ -246,7 +246,7 @@ abstract class Base implements ArrayAccess, Iterator {
     /**
      * @see ArrayAccess::offsetGet()
      */
-    public function &offsetGet($index) {
+    public function offsetGet($index) {
         return $this->$index;
     }
     /**

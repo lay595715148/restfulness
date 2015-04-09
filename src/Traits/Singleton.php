@@ -1,15 +1,21 @@
 <?php
 namespace Lay\Traits;
 
+use RuntimeException;
+
 // 单例模式
 trait Singleton {
-    protected static $instance;
+    protected static $_singletonStack = array();
     protected function __construct() {}
     public function __clone() {
-        throw new \RuntimeException('Cloning '. get_called_class() .' is not allowed');
+        throw new RuntimeException('Cloning '. get_called_class() .' is not allowed');
     }
     public static function getInstance() {
-        return static::$instance ? static::$instance : (static::$instance = new static);
+        $classname = get_called_class();
+        if (empty(self::$_singletonStack[$classname])){
+            self::$_singletonStack[$classname] = new $classname();
+        }
+        return self::$_singletonStack[$classname];
     }
 }
 
