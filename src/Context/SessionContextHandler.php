@@ -1,13 +1,13 @@
 <?php
-namespace core;
+namespace Lay|Context;
 
 // $config = array(
 //     'token' => (string),     // 必须，上下文存储唯一标识
 // );
 //
 // $handler = ContextHandler::factory('session', $config);
-// $handler = new SessionContextHandler($config);
-class SessionContextHandler extends AbstractContextHandler {
+// $handler = new SessionContext($config);
+class SessionContext extends ContextHandler {
     public function set($key, $val) {
         $token = $this->getToken();
         $_SESSION[$token][$key] = $val;

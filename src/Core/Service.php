@@ -1,24 +1,73 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
-abstract class Service {
-	use traits\Singleton;
-    /**
-     * 数据访问对象，为主表（或其他）数据模型的数据访问对象
-     * 
-     * @var Store
-     */
-    protected $store;
+use Lay\Core\Component;
+use Lay\Core\Model;
+use Lay\Traits\Singleton;
+use Lay\Util\Logger;
+use Exception;
+
+abstract class Service extends Component implements Serviceable {
+	use Singleton;
     /**
      * 构造方法
-     * @param Store $store 数据库访问对象
+     * @return Service
      */
-    protected function __construct($store = '') {
-        //if($store && is_a($store, 'lay\core\Store')) {
-        //    $this->store = $store;
-        //}
-        //PluginManager::exec(Service::H_CREATE, array($this));
-        //EventEmitter::emit(Service::E_CREATE, array($this));
+    protected function __construct() {
+        //初始化
+        foreach ($this->properties() as $name => $class) {
+            if(is_subclass_of($class, 'Lay\Core\Model')) {
+                $this->$name = $class::getInstance();
+            } else {
+                throw new Exception("$class is not subclass of Lay\Core\Model");
+            }
+        }
+    }
+    /**
+     * 主Model类名
+     * @return string
+     */
+    public abstract function basic();
+    /**
+     * 其他Model类名数组
+     * array('other' => 'Lay\Model\Other')
+     * @return array
+     */
+    public abstract function associates();
+    /**
+     * @see Component::properties()
+     * @return array array('model' => 'Lay\Model\Class')
+     */
+    public final function properties() {
+        $properties  = array();
+        //basic model
+        $properties['model'] = $this->basic();
+        foreach ($this->associates() as $name => $value) {
+            $properties[$name] = $value;
+        }
+        return $properties;
+    }
+    /**
+     * @see Component::rules()
+     */
+    public final function rules() {
+        $rules = array();
+        foreach ($this->properties() as $name => $class) {
+            $rules[$name] = array(Component::TYPE_FORMAT, array('class' => $class));
+        }
+        return $rules;
+    }
+    /**
+     * @return Model
+     */
+    public final function format($val, $option = array()) {
+        $class = empty($option['class']) ? 'Lay\Core\Model' : $option['class'];
+        if(is_a($val, $class)) {
+            return $val;
+        } else {
+            Logger::error('given value is not class ' . $class);
+            return null;
+        }
     }
     /**
      * 获取某条记录
@@ -28,7 +77,7 @@ abstract class Service {
      * @return array
      */
     public function get($id) {
-        return $this->store->get($id);
+        return $this->model->get($id);
     }
     /**
      * 增加一条记录
@@ -38,7 +87,7 @@ abstract class Service {
      * @return boolean
      */
     public function add(array $info) {
-        return $this->store->add($info);
+        return $this->model->add($info);
     }
     /**
      * 删除某条记录
@@ -48,7 +97,7 @@ abstract class Service {
      * @return boolean
      */
     public function del($id) {
-        return $this->store->del($id);
+        return $this->model->del($id);
     }
     /**
      * 更新某条记录
@@ -60,7 +109,7 @@ abstract class Service {
      * @return boolean
      */
     public function upd($id, array $info) {
-        return $this->store->upd($id, $info);
+        return $this->model->upd($id, $info);
     }
     /**
      * 某些条件下的记录数
@@ -70,7 +119,7 @@ abstract class Service {
      * @return int
      */
     public function count(array $info = array()) {
-        return $this->store->count($info);
+        return $this->model->count($info);
     }
 }
 

@@ -1,33 +1,36 @@
 <?php
 namespace Lay\Core;
 
-use Lay\Core\Base;
-use Lay\Core\InterfaceModel;
+use Lay\Core\Component;
+use Lay\Core\Modelizable;
 
 use Lay\Traits\Singleton;
 
-abstract class Model extends Base implements InterfaceModel {
+abstract class Model extends Component implements Modelizable {
     use Singleton;
     /**
      * 构造方法
      * @return Model
      */
     protected function __construct() {
+        foreach ($this->properties() as $name) {
+            $this->$name = null;
+        }
     }
     /**
-     * @see Base::properties()
+     * @see Component::properties()
      */
     public function properties() {
         return array();
     }
     /**
-     * @see Base::rules()
+     * @see Component::rules()
      */
     public function rules() {
         return array();
     }
     /**
-     * @see Base::format()
+     * @see Component::format()
      */
     public function format($val, $options = array()) {
         return $val;
@@ -39,21 +42,26 @@ abstract class Model extends Base implements InterfaceModel {
     public final function toArray() {
         $ret = array();
         foreach ($this->properties() as $name) {
-            $ret[$name] = strval($this[$name]);
+            if(isset($this->$name)) {
+                $ret[$name] = $this->$name;
+            }
         }
         return $ret;
     }
 
-    public function get($id, $options = array()) {
+    public function get($id) {
         
     }
-    public function add(array $info, $options = array()) {
+    public function add(array $info) {
 
     }
-    public function del($id, $options = array()) {
+    public function del($id) {
 
     }
-    public function upd($id, array $info, $options = array()) {
+    public function upd($id, array $info) {
+
+    }
+    public function count(array $info = array()) {
 
     }
     public function save() {

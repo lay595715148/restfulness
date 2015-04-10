@@ -1,10 +1,11 @@
 <?php
-namespace core;
+namespace Lay\Core;
 
+use Lay\Traits\Singleton;
 use ArrayAccess;
 
 class Session implements ArrayAccess {
-    //use \Lysine\Traits\Singleton;
+    use Singleton;
     protected $start;
     protected $data = array();
     protected $snapshot = array();

@@ -19,7 +19,7 @@ class Autoloader {
      */
     public static function register() {
         // 添加第三方库类文件目录
-        self::addpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
+        self::addPath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'lib');
         // 使用自定义的autoload方法
         spl_autoload_register(array('Lay\Autoloader', 'autoload'));
         // 设置缓存文件目录
@@ -53,7 +53,7 @@ class Autoloader {
      *            类目录字符串
      * @return void
      */
-    public static function addpath($classpath) {
+    public static function addPath($classpath) {
         if(is_dir($classpath)) {
             $classpaths = empty(self::$_classpath) ? array() : explode(';', self::$_classpath);
             $classpaths[] = realpath($classpath);

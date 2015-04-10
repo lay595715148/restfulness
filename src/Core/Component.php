@@ -9,82 +9,82 @@ use Iterator;
 use ArrayAccess;
 use stdClass;
 
-abstract class Base implements ArrayAccess, Iterator {
+abstract class Component implements ArrayAccess, Iterator {
     /**
      * 忽略类型的属性值
      * @var int
      */
-    const PROPETYPE_IGNORE = 0;
+    const TYPE_IGNORE = 0;
     /**
      * 字符串类型的属性值
      * @var int
      */
-    const PROPETYPE_STRING = 1;
+    const TYPE_STRING = 1;
     /**
      * 数值类型的属性值
      * @var int
      */
-    const PROPETYPE_NUMBER = 2;
+    const TYPE_NUMBER = 2;
     /**
      * 整数类型的属性值
      * @var int
      */
-    const PROPETYPE_INTEGER = 3;
+    const TYPE_INTEGER = 3;
     /**
      * 布尔类型的属性值
      * @var int
      */
-    const PROPETYPE_BOOLEAN = 4;
+    const TYPE_BOOLEAN = 4;
     /**
      * 日期时间类型的属性值
      * @var int
      */
-    const PROPETYPE_DATETIME = 5;
+    const TYPE_DATETIME = 5;
     /**
      * 日期类型的属性值
      * @var int
      */
-    const PROPETYPE_DATE = 6;
+    const TYPE_DATE = 6;
     /**
      * 时间类型的属性值
      * @var int
      */
-    const PROPETYPE_TIME = 7;
+    const TYPE_TIME = 7;
     /**
      * 浮点数类型的属性值
      * @var int
      */
-    const PROPETYPE_FLOAT = 8;
+    const TYPE_FLOAT = 8;
     /**
      * double类型的属性值
      * @var int
      */
-    const PROPETYPE_DOUBLE = 9;
+    const TYPE_DOUBLE = 9;
     /**
      * 数组类型的属性值
      * @var int
      */
-    const PROPETYPE_ARRAY = 10;
+    const TYPE_ARRAY = 10;
     /**
      * 数组类型的属性值
      * @var int
      */
-    const PROPETYPE_PURE_ARRAY = 11;
+    const TYPE_PURE_ARRAY = 11;
     /**
      * 特定格式类型的属性值
      * @var int
      */
-    const PROPETYPE_DATEFORMAT = 12;
+    const TYPE_DATEFORMAT = 12;
     /**
      * 指定值范围的属性值
      * @var int
      */
-    const PROPETYPE_ENUM = 13;
+    const TYPE_ENUM = 13;
     /**
      * 其他类型的属性值
      * @var int
      */
-    const PROPETYPE_FORMAT = 14;
+    const TYPE_FORMAT = 14;
     /**
      * 返回对象所有属性名的数组
      * @return array
@@ -111,49 +111,49 @@ abstract class Base implements ArrayAccess, Iterator {
             $rules = $this->rules();
             if(! empty($rules) && array_key_exists($name, $rules)) {
                 switch($rules[$name]) {
-                    case self::PROPETYPE_IGNORE:
+                    case self::TYPE_IGNORE:
                         $this->$name = $value;
                         break;
-                    case self::PROPETYPE_STRING:
+                    case self::TYPE_STRING:
                         $this->$name = strval($value);
                         break;
-                    case self::PROPETYPE_NUMBER:
+                    case self::TYPE_NUMBER:
                         $this->$name = 0 + $value;
                         break;
-                    case self::PROPETYPE_INTEGER:
+                    case self::TYPE_INTEGER:
                         $this->$name = intval($value);
                         break;
-                    case self::PROPETYPE_BOOLEAN:
+                    case self::TYPE_BOOLEAN:
                         $this->$name = $value ? true : false;
                         break;
-                    case self::PROPETYPE_DATETIME:
+                    case self::TYPE_DATETIME:
                         $this->$name = !is_numeric($value) ? !is_string($value) ?: date('Y-m-d H:i:s', strtotime($value)) : date('Y-m-d H:i:s', intval($value));
                         break;
-                    case self::PROPETYPE_DATE:
+                    case self::TYPE_DATE:
                         $this->$name = !is_numeric($value) ? !is_string($value) ?: date('Y-m-d', strtotime($value)) : date('Y-m-d', intval($value));
                         break;
-                    case self::PROPETYPE_TIME:
+                    case self::TYPE_TIME:
                         $this->$name = !is_numeric($value) ? !is_string($value) ?: date('H:i:s', strtotime($value)) : date('H:i:s', intval($value));
                         break;
-                    case self::PROPETYPE_FLOAT:
+                    case self::TYPE_FLOAT:
                         $this->$name = floatval($value);
                         break;
-                    case self::PROPETYPE_DOUBLE:
+                    case self::TYPE_DOUBLE:
                         $this->$name = doubleval($value);
                         break;
-                    case self::PROPETYPE_ARRAY:
+                    case self::TYPE_ARRAY:
                         $this->$name = !is_array($value) ?: $value;
                         break;
-                    case self::PROPETYPE_PURE_ARRAY:
+                    case self::TYPE_PURE_ARRAY:
                         $this->$name = !is_array($value) ?: Utility::toPureArray($value);
                         break;
                     default:
                         if(is_array($rules[$name]) && $pure = Utility::toPureArray($rules[$name])) {
-                            if(count($pure) > 1 && self::PROPETYPE_DATEFORMAT == $pure[0]) {
+                            if(count($pure) > 1 && self::TYPE_DATEFORMAT == $pure[0]) {
                                 $this->$name = !is_numeric($value) ? !is_string($value) ?: date($pure[1], strtotime($value)) : date($pure[1], intval($value));
-                            } else if(count($pure) > 1 && self::PROPETYPE_ENUM == $pure[0]) {
+                            } else if(count($pure) > 1 && self::TYPE_ENUM == $pure[0]) {
                                 $this->$name = !in_array($value, (array)$pure[1]) ?: $value;
-                            } else if(count($pure) > 1 && self::PROPETYPE_FORMAT == $pure[0]) {
+                            } else if(count($pure) > 1 && self::TYPE_FORMAT == $pure[0]) {
                                 $this->$name = $this->format($value, (array)$pure[1]);
                             }
                         }
@@ -186,7 +186,12 @@ abstract class Base implements ArrayAccess, Iterator {
      * @return boolean
      */
     public final function __isset($name) {
-        return array_key_exists($name, $this->properties());
+        $properties = $this->properties();
+        if(Utility::isAssocArray($properties)) {
+            return array_key_exists($name, $properties);
+        } else {
+            return array_key_exists($name, array_flip($properties));
+        }
     }
     /**
      * 无法将某个属性去除

@@ -3,9 +3,11 @@ namespace Lay\Http;
 
 use Lay\Core\AbstractSingleton;
 use Lay\Core\Session;
+use Lay\Traits\Singleton;
 use HttpResponse;
 
-class Response extends AbstractSingleton {
+class Response {
+    use Singleton;
     protected $httpResponse;
     protected $code = Http::OK;
     protected $header = array();

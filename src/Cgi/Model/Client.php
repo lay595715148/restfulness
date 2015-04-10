@@ -10,16 +10,16 @@ class Client extends Model {
 			'nick'
 		);
 	}
-	public function get($id, $options = array()) {
+	public function get($id) {
 		
 	}
-	public function add(array $info, $options = array()) {
+	public function add(array $info) {
 		
 	}
-	public function del($id, $options = array()) {
+	public function del($id) {
 		
 	}
-	public function upd($id, array $info, $options = array()) {
+	public function upd($id, array $info) {
 		
 	}
     public function save() {

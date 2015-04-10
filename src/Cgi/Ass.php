@@ -20,7 +20,9 @@ class Ass extends Action {
 	public function onGet() {
 		$model = \Lay\Cgi\Model\User::getInstance();
 		$model->name = 'Lay Li';
-		$eq = \Lay\Cgi\Model\User::getInstance() === $model ? 'true' : 'false';
+		$service = \Lay\Cgi\Service\People::getInstance();
+		$eq = $service->get(1);
+		//$eq = \Lay\Cgi\Model\User::getInstance() === $model ? 'true' : 'false';
 		/*if($this->request->getExtension() == 'src') {
 			highlight_string(file_get_contents(__FILE__));
 			$ret = v::not(v::int())->validate('DSDSD');;echo "<br>$ret<br>";
@@ -40,7 +42,7 @@ class Ass extends Action {
 			//$model = \Lay\Cgi\Model\User::getInstance();
 			$bean->name = array('first' => 'Lay', 'last' => 'Li' , 'self' => new User());
 			$bean->nick = 'nick';
-			$this->template->push(array('parse' => $model->toArray(), 'pinyin' => $pinyin, 'body' => $res['body']));
+			$this->template->push(array('parse' => $service, 'pinyin' => $pinyin, 'body' => $res['body']));
 			//$this->template->header('Server: restfulness');
 			$this->template->file('ass.php');
 			//echo '<pre>';print_r($this->template);echo '</pre>';

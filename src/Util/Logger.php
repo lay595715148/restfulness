@@ -1,10 +1,11 @@
 <?php
 namespace Lay\Util;
 
-use Lay\Core\AbstractSingleton;
+use Lay\Traits\Singleton;
 use Lay\Core\App;
 
-class Logger extends AbstractSingleton {
+class Logger {
+    use Singleton;
     /**
      * 定义不打印输出或不记录日志的级别
      *

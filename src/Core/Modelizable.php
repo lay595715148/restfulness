@@ -2,12 +2,9 @@
 namespace Lay\Core;
 
 use Lay\Core\Bean;
+use Lay\DB\CRUDable;
 
-interface InterfaceModel {
-	public function get($id, $options = array());
-	public function add(array $info, $options = array());
-	public function del($id, $options = array());
-	public function upd($id, array $info, $options = array());
+interface Modelizable extends CRUDable {
     public function save();
     /**
      * 返回模型对应数据表名或其他数据库中的集合名称

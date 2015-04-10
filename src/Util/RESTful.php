@@ -3,12 +3,13 @@ namespace Lay\Util;
 
 use Lay\Http\Request;
 use Lay\Http\Response;
-use Lay\Core\AbstractSingleton;
+use Lay\Traits\Singleton;
 
 use RuntimeException;
 use Exception;
 
-class RESTful extends AbstractSingleton {
+class RESTful{
+    use Singleton;
     protected static $_supported_http_methods = array('get', 'delete', 'post', 'put', 'patch', 'head');
     protected static $_supported_formats = array(
         'xml'           => 'application/xml',

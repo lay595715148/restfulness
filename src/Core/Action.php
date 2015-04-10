@@ -6,7 +6,7 @@ use Lay\Core\EventEmitter;
 use Lay\Http\Request;
 use Lay\Http\Response;
 use Lay\Core\Template;
-use Lay\Core\InterfaceAction;
+use Lay\Core\Actionizable;
 
 use Lay\Traits\Singleton;
 
@@ -14,7 +14,7 @@ use Lay\Util\Logger;
 use Lay\Util\Utility;
 use Lay\Autoloader;
 
-abstract class Action implements InterfaceAction {
+abstract class Action implements Actionizable {
 	use Singleton;
 	//use Lay\Traits\Action;
     /**

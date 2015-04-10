@@ -1,17 +1,17 @@
 <?php
 namespace Lay\Core;
 
-use Lay\Core\Base;
+use Lay\Core\Component;
 use Lay\Util\Logger;
 use Lay\Util\Utility;
-use Lay\Core\InterfaceBean;
+use Lay\Core\Beanizable;
 use ReflectionObject;
 use ReflectionProperty;
 use Iterator;
 use ArrayAccess;
 use stdClass;
 
-abstract class Bean extends Base implements InterfaceBean {
+abstract class Bean extends Component implements Beanizable {
     public final function __construct() {
         //初始化值
         foreach ($this->properties() as $name => $value) {
@@ -19,19 +19,19 @@ abstract class Bean extends Base implements InterfaceBean {
         }
     }
     /**
-     * @see Base::properties()
+     * @see Component::properties()
      */
     public function properties() {
         return array();
     }
     /**
-     * @see Base::rules()
+     * @see Component::rules()
      */
     public function rules() {
         return array();
     }
     /**
-     * @see Base::format()
+     * @see Component::format()
      */
     public function format($val, $options = array()) {
         return $val;
@@ -39,7 +39,7 @@ abstract class Bean extends Base implements InterfaceBean {
 
     /**
      * 清空对象所有属性值
-     * @return InterfaceBean
+     * @return Beanizable
      */
     public final function restore() {
         // 恢复默认值

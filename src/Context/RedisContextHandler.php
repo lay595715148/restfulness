@@ -7,9 +7,9 @@ namespace core;
 //     'ttl' => (integer),      // 可选，生存期，单位：秒，默认：0
 // );
 //
-// $handler = AbstractContextHandler::factory('redis', $config);
-// $handler = new RedisContextHandler($config);
-class RedisContextHandler extends AbstractContextHandler {
+// $handler = ContextHandler::factory('redis', $config);
+// $handler = new RedisContext($config);
+class RedisContext extends ContextHandler {
     protected $data;
     protected $saved_keys;
     protected $dirty = false;

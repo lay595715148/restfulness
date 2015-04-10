@@ -21,9 +21,9 @@ namespace core;
 //     'zip' => (bool),             // 可选，是否将数据压缩保存，默认：false
 // );
 //
-// $handler = AbstractContextHandler::factory('cookie', $config);
+// $handler = ContextHandler::factory('cookie', $config);
 // $handler = new CookieContextHandler($config);
-class CookieContextHandler extends AbstractContextHandler {
+class CookieContextHandler extends ContextHandler {
     protected $data;
     public function set($key, $val) {
         $this->restore();

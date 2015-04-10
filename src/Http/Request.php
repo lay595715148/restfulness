@@ -5,8 +5,8 @@ use Lay\Traits\Singleton;
 use Lay\Core\AbstractSingleton;
 use HttpRequest;
 
-class Request extends AbstractSingleton {
-    //use Singleton;
+class Request {
+    use Singleton;
     protected $httpRequest;
     protected $method;
     protected $pathinfo;

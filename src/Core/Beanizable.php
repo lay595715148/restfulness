@@ -5,7 +5,7 @@ use ArrayAccess;
 use Iterator;
 use JsonSerializable;
 
-interface InterfaceBean extends ArrayAccess, Iterator, JsonSerializable {
+interface Beanizable extends JsonSerializable {
     /**
      * 返回对象属性名对属性值的数组
      * @return array
@@ -18,7 +18,7 @@ interface InterfaceBean extends ArrayAccess, Iterator, JsonSerializable {
     public function toStandard();
     /**
      * 清空对象所有属性值
-     * @return InterfaceBean
+     * @return Beanizable
      */
     public function restore();
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Lay\Core;
 
-interface InterfaceAction {
+interface Actionizable {
     /**
      * 创建事件触发方法
      */

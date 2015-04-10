@@ -11,7 +11,7 @@ class User extends Model {
 		);
 	}
 	public function get($id, $options = array()) {
-		
+		return $this->toArray();
 	}
 	public function add(array $info, $options = array()) {
 		
