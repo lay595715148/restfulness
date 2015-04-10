@@ -397,7 +397,7 @@ class Template {
                 header($header);
             }
             // set css data string
-            $results = Utility::array2CSS($this->vars);
+            $results = implode("\n", $this->vars);
             // send
             echo $results;
         }

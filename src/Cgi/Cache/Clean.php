@@ -12,14 +12,13 @@ use Assetic\Asset\GlobAsset;
 
 class Clean extends Action {
 	public function onGet() {
-		// 类加载路径缓存
-		Autoloader::cleanCache();
-		// 配置信息缓存
-		Configuration::cleanCache();
+		$this->template->push('isok', true);
 		// 前端缓存
 		self::cleanCache();
-		//Action::cleanCache();
-		$this->template->push('isok', true);
+		// 配置信息缓存
+		Configuration::cleanCache();
+		// 类加载路径缓存
+		Autoloader::cleanCache();
 	}
 }
 // PHP END

@@ -202,9 +202,7 @@ class Autoloader {
     public static function cleanCache() {
         $cachename = realpath(self::$_cachedir . DIRECTORY_SEPARATOR . self::$_cachefile);
         self::$_dirty = false;
-        if(is_file($cachename)) {
-            @unlink($cachename);
-        }
+        is_file($cachename) && @unlink($cachename);
     }
     /**
      * 更新类路径缓存
