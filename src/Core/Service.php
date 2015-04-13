@@ -13,7 +13,7 @@ abstract class Service extends Component implements Serviceable {
      * 构造方法
      * @return Service
      */
-    protected function __construct() {
+    protected final function __construct() {
         //初始化
         foreach ($this->properties() as $name => $class) {
             if(is_subclass_of($class, 'Lay\Core\Model')) {

@@ -118,7 +118,7 @@ class Template {
     /**
      * 构造方法
      */
-    protected function __construct() {
+    protected final function __construct() {
         $this->request = Request::getInstance()->getHttpRequest();
         $this->response = Response::getInstance()->getHttpResponse();
         $this->directory(App::$_docpath);//初始化文档目录
@@ -126,6 +126,9 @@ class Template {
         $this->resource();//初始化语言包
         $this->theme(App::get('theme', 'default'));//初始化主题皮肤
 
+        $this->listen();
+    }
+    protected final function listen() {
         App::$_event->listen(App::$_app, App::E_FINISH, array($this, 'spit'));
     }
     /**

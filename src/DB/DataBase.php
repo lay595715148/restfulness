@@ -2,8 +2,35 @@
 namespace Lay\DB;
 
 use Lay\Core\Model;
+use Lay\DB\CRUDable;
+use Lay\DB\Mysql;
+use Lay\DB\Mongo;
+use Lay\DB\Redis;
+use Lay\DB\Memcache;
+use Lay\Traits\Singleton;
 
-abstract class DataBase {
+abstract class DataBase implements CRUDable {
+    use Singleton;
+    public static function factory($name) {
+        switch ($name) {
+            case 'memcache':
+            case 'memcached':
+                return Memcache::getInstance();
+                break;
+            case 'redis':
+                return Redis::getInstance();
+                break;
+            case 'mongodb':
+            case 'mongo':
+                return Mongo::getInstance();
+                break;
+            case 'mysql':
+            default:
+                return Mysql::getInstance();
+                break;
+        }
+    }
+
 	protected $model;
     /**
      * 设置模型对象
@@ -25,50 +52,6 @@ abstract class DataBase {
      * @return boolean
      */
     public abstract function connect();
-    /**
-     * 获取某条记录
-     * 
-     * @param int|string $id
-     *            ID
-     * @return array
-     */
-    public abstract function get($id);
-    /**
-     * 删除某条记录
-     * 
-     * @param int|string $id
-     *            ID
-     * @return boolean
-     */
-    public abstract function del($id);
-    /**
-     * 增加一条记录
-     * 
-     * @param array $info
-     *            数据数组
-     * @return boolean
-     */
-    public abstract function add(array $info);
-    
-    /**
-     * 更新某条记录
-     * 
-     * @param int|string $id
-     *            ID
-     * @param array $info
-     *            数据数组
-     * @return boolean
-     */
-    public abstract function upd($id, array $info);
-    
-    /**
-     * 某些条件下的记录数
-     * 
-     * @param array $info
-     *            数据数组
-     * @return int
-     */
-    public abstract function count(array $info = array());
     /**
      * close connection
      * @return boolean

@@ -1,5 +1,5 @@
 <?php
-namespace Lay\DB;
+namespace Lay\Core;
 
 interface Synchronous {
 	public function sync();

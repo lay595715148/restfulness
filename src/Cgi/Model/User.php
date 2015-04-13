@@ -1,30 +1,24 @@
 <?php
 namespace Lay\Cgi\Model;
 
-use Lay\Core\Model;
+use Lay\Core\ModelAsync;
+use Lay\Core\Asynchronous;
+use Lay\DB\Database;
 
-class User extends Model {
+class User extends ModelAsync implements Asynchronous {
 	public function properties() {
 		return array(
 			'id',
 			'name'
 		);
 	}
-	public function get($id, $options = array()) {
-		return $this->toArray();
+	public function rules() {
+		return array();
 	}
-	public function add(array $info, $options = array()) {
-		
+	public function db() {
+		return Database::factory('mysql');
 	}
-	public function del($id, $options = array()) {
-		
-	}
-	public function upd($id, array $info, $options = array()) {
-		
-	}
-    public function save() {
-		
-	}
+
     /**
      * 返回模型对应数据表名或其他数据库中的集合名称
      * @return string
